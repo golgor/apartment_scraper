@@ -53,28 +53,28 @@ class Apartment:
             self._bezirk_no = "N/A"
             self._bezirk_name = "N/A"
             self._street_adress = "N/A"
-            logger.error("Error i Location!")
+            logger.error(f"Error: location_div\n{str(location_div)}")
 
     def get_title(self):
         try:
             self._title = self._quick_facts_div.h1.text
         except:
-            self._title = "No title"
-            logger.error("Error i title!")
+            self._title = "N/A"
+            logger.error(f"Error i quick_facts_div\n{str(self._quick_facts_div)}!")
 
     def get_facts(self):
         self.get_title()
         self.get_location()
         test = re.findall("[0-9,.]+ ", str(self._hardfacts_div))
         try:
-            self._rent = test[0]
-            self._area = test[1]
-            self._rooms = test[2]
+            self._rent = test[0].strip(".")
+            self._area = test[1].strip(".")
+            self._rooms = test[2].strip(".")
         except:
-            self._rent = 1
-            self._area = 1
-            self._rooms = 1
-            logger.error("Error i facts")
+            self._rent = "N/A"
+            self._area = "N/A"
+            self._rooms = "N/A"
+            logger.error(f"Error in hardfacts\n{str(self._hardfacts_div)}")
 
     def __str__(self) -> str:
         return (
