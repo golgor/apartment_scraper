@@ -4,7 +4,7 @@ from collections import Counter
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options 
+from selenium.webdriver.chrome.options import Options
 
 
 chrome_options = Options()
@@ -13,42 +13,50 @@ chrome_options.add_argument("--incognito")
 
 URL = "https://www.immowelt.at/liste/wien-10-favoriten/wohnungen/mieten"
 # URL = "https://www.immowelt.at/liste/wien/wohnungen/mieten"
-# driver = webdriver.Chrome('C:\software\chromedriver_win32\chromedriver.exe', chrome_options=chrome_options)
 driver = webdriver.Chrome(executable_path='/usr/bin/chromedriver', chrome_options=chrome_options)
+
 
 def close_webdriver():
     driver.quit()
+
 
 def get_source():
     page_source = driver.page_source
     return BeautifulSoup(page_source, 'html.parser')
 
+
 def set_driver_url(url):
     driver.get(url)
+
 
 def get_apartments(url: str, expected_results: int, counter):
     listings = 0
     max_tries = 10
     current_tries = 0
-    apartment_divs = []    
+    apartment_divs = []
 
     # Set the URL to scrape
     set_driver_url(url)
 
     while listings < expected_results:
-        # Scroll to bottom of the page, forcing the page to add more apartment entries.
+        # Scroll to bottom of the page, forcing the
+        # page to add more apartment entries.
         # Then get the source of the page.
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        driver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);"
+        )
         time.sleep(0.3)
         source = get_source()
         time.sleep(0.3)
 
         # Find all divs for apartments and count how many.
         # Need regex due to different premium and regular divs.
-        apartment_divs = set(source.findAll("div", re.compile('listitem.*relative js-listitem')))
+        regex = re.compile('listitem.*relative js-listitem')
+        apartment_divs = set(source.findAll("div", regex))
         listings = len(apartment_divs)
 
-        # Sleep for a short while to give some time for the pages javascript to run
+        # Sleep for a short while to give some time for
+        # the pages javascript to run
         time.sleep(0.4)
 
         # To avoid infinite loop in case expected hits are to high.
@@ -101,6 +109,7 @@ def get_apartments_urls(apartments):
         for apartment
         in apartments
     ]
+
 
 def collect_apartment_urls(url):
     set_driver_url(url)
