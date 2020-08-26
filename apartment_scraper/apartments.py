@@ -1,9 +1,9 @@
-import requests
-import re
-from bs4 import BeautifulSoup
-import pandas as pd
 import logging
+import re
 
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 
 # Logging: https://docs.python.org/3/howto/logging-cookbook.html
 
@@ -25,79 +25,65 @@ f_handler.setFormatter(f_format)
 logger.addHandler(c_handler)
 logger.addHandler(f_handler)
 
-FILE = "apartments.txt"
-
 # TODO: Implement class method to validate URL, see:
 # https://stackoverflow.com/questions/25200763/how-to-return-none-if-constructor-arguments-invalid
 
 
-class Apartment:
-    def __init__(self, url: str):
-        self.url = url
+def get_source(apartment) -> BeautifulSoup:
+    """Function to getting the source from a url.
 
-    def get_source(self):
-        r = requests.get(self.url)
-        self._soup = BeautifulSoup(r.content, features="html.parser")
+    Args:
+        apartment (Apartment): The object to process.
 
-        # If the current url is not available anymore, a message is given
-        # in a div. I.e. if this div is on the page, the object is no
-        # longer available on the site. Setting internal values to None
-        # makes all other values to default to N/A.
-        # TODO: Remove this instance from the apartmentlist
-        if self._soup.find("div", "message_info understitial_message_box"):
-            self._quick_facts = None
-            self._hardfacts = None
-            return -1
+    Returns:
+        BeautifulSoup: Soup of the source.
+    """
+    try:
+        r = requests.get(apartment.url)
+        # Todo, check for http-status?
+        return BeautifulSoup(r.content, features="html.parser")
+    except Exception:
+        logger.error("Couldn't not find source and convert to"
+                     f"soup for object {apartment.url}.")
+        return None
 
-        self._quick_facts = self._soup.find("div", "quickfacts iw_left")
-        self._hardfacts = self._soup.find("div", "hardfacts clear")
 
-    def get_location(self):
-        if self._quick_facts:
-            location_div = self._quick_facts.find("span", "no_s")
-            location = location_div.text.split()
+def get_div(soup, html_type, class_name: str):
+    """Function to scrape the two facts divs from a soup.
 
-            self.bezirk_no = parse_bezirk_no(location)
-            self.city = parse_city(location)
-            self.bezirk_name = parse_bezirk_name(location)
-            self.address = parse_address(location)
+    Args:
+        soup (Beautifulsoup): A soup where to find a pattern.
+        regex (str): A regex string to use.
+
+    Returns:
+        soup: If found, returns a soup for the div with the wanted class.
+    """
+    try:
+        div = soup.find(html_type, class_name)
+        if div:
+            return div
         else:
-            self.city = "N/A"
-            self.bezirk_no = "N/A"
-            self.bezirk_name = "N/A"
-            self.address = "N/A"
-
-    def get_title(self):
-        try:
-            self._title = self._quick_facts_div.h1.text
-        except Exception:
-            self._title = "N/A"
-
-    def get_hard_facts(self):
-        if self._hardfacts:
-            hardfacts = re.sub("[\s.]", "", str(self._hardfacts).lower())
-            self.rent = get_value_with_regex(div=hardfacts, regex="[0-9,]+€")
-            self.area = get_value_with_regex(div=hardfacts, regex="([0-9,]+)m")
-            self.rooms = get_value_with_regex(div=hardfacts, regex=">([0-9])<")
-        else:
-            logger.error(f"No hard facts div found for object {self.url}")
-            self.rent = "N/A"
-            self.area = "N/A"
-            self.rooms = "N/A"
-
-    def __str__(self) -> str:
-        return (
-            f"Link: {self.url}\n"
-            f"City: {self._city}\n"
-            f"Bezirk: {self.bezirk_no}. {self.bezirk_name}\n"
-            f"Address: {self.address}\n"
-            f"Rent: {self.rent}\n"
-            f"Area: {self.area}\n"
-            f"Rooms: {self.rooms}\n"
-        )
+            logger.info(f"No tag with type '{html_type}' and "
+                        f"attribute '{class_name}' found!")
+            return None
+    except Exception:
+        logger.error(f"No soup found to parse for a '{html_type}' "
+                     f"with attribute '{class_name}'")
+        return None
 
 
 def get_value_with_regex(div: str, regex: str) -> str:
+    """Get a value from a str that matches a specific regex.
+
+    Args:
+        div (str): A stringified div to search.
+        regex (str): A regex expression.
+
+    Returns:
+        str: A value matching the pattern from the regex.
+    """
+    if div is None:
+        return None
     try:
         # Try to find the regex as provided and return
         # the value, else return N/A
@@ -109,65 +95,85 @@ def get_value_with_regex(div: str, regex: str) -> str:
         # This error will occur if no expression is found. re.search
         # will return None which does not have the attribute 'group'
         logger.info(f"{e} - No substring found")
-        return "N/A"
+        return None
     except Exception as e:
         logger.error(f"{e} ({regex}) in:\n{div}\n")
-        return "N/A"
+        return None
 
 
-def get_parsed(source: BeautifulSoup, name: str, tag_type="div") -> str:
-    div = source.find(tag_type, name)
-    return re.sub("[\s.]", "", str(div).lower())
+def stringify_div(div):
+    if div is not None:
+        return re.sub("[\s.]", "", str(div).lower())
+    else:
+        return None
 
 
-def parse_bezirk_no(quick_fact_list: list) -> int:
-    try:
-        if quick_fact_list[0].isnumeric():
-            return int(quick_fact_list[0][1:3])
-    except Exception:
-        return 0
+def get_location(div):
+    if div is None:
+        return None, None
+    location_list = div.text.split()
+    return location_list[0][1:3], location_list[1]
 
 
-def parse_city(quick_fact_list: list) -> str:
-    return quick_fact_list[1]
+class Apartment:
+    def __init__(self, url: str):
+        self.url = url
+        # If the current url is not available anymore, a message is given
+        # in a div. I.e. if this div is on the page, the object is no
+        # longer available on the site. Setting internal values to None
+        # makes all other values to default to N/A.
+        # TODO: Remove this instance from the apartmentlist
+
+    def fetch_data(self):
+        """Function to fetch the data and specific divs
+        """
+        self.soup = get_source(self)
+        self.quickfacts = get_div(self.soup, "div", "quickfacts iw_left")
+        self.hardfacts = get_div(self.soup, "div", "hardfacts clear")
+
+    def process_data(self):
+        hardfacts = stringify_div(self.hardfacts)
+        self.rent = get_value_with_regex(div=hardfacts, regex="[0-9,]+€")
+        self.area = get_value_with_regex(div=hardfacts, regex="([0-9,]+)m")
+        self.rooms = get_value_with_regex(div=hardfacts, regex=">([0-9])<")
+
+        quickfacts = get_div(self.quickfacts, "span", "no_s")
+        self.bezirk, self.city = get_location(quickfacts)
 
 
-def parse_bezirk_name(quick_fact_list: list) -> str:
-    return re.sub("[^A-Za-z]", "", quick_fact_list[2])
+def main(file):
+    with open(file) as f:
+        apartment_list = [
+            Apartment(apartment)
+            for apartment
+            in f.read().split("\n")[:-1]
+        ]
 
-
-def parse_address(quick_fact_list: list) -> str:
-    try:
-        return quick_fact_list[3]
-    except Exception:
-        return ""
-
-
-with open(FILE) as f:
-    apartment_list = [
-        Apartment(apartment)
-        for apartment
-        in f.read().split("\n")[:-1]
-    ]
-
-data = pd.DataFrame(columns=["rent", "area", "rooms", "bezirk_no",
-                             "bezirk_name", "city", "url"])
-
-
-for idx, apartment in enumerate(apartment_list):
-    print(f"Processing id: {idx}")
-    apartment.get_source()
-    apartment.get_hard_facts()
-    apartment.get_location()
-    data.loc[idx] = (
-        apartment.rent,
-        apartment.area,
-        apartment.rooms,
-        # apartment.address,
-        apartment.bezirk_no,
-        apartment.bezirk_name,
-        apartment.city,
-        apartment.url
+    data = pd.DataFrame(
+        columns=["rent", "area", "rooms", "bezirk_no", "city", "url"]
     )
 
-data.to_excel("apartments.xlsx")
+    for idx, apartment in enumerate(apartment_list[:15]):
+        print(f"Processing id: {idx}")
+
+        # Fetching typically 0.7 seconds
+        apartment.fetch_data()
+
+        # Processing typically 200µs
+        apartment.process_data()
+
+        data.loc[idx] = (
+            apartment.rent,
+            apartment.area,
+            apartment.rooms,
+            apartment.bezirk,
+            apartment.city,
+            apartment.url
+        )
+
+    data.to_excel("apartments.xlsx")
+
+
+FILE = "apartments.txt"
+if __name__ == "__main__":
+    main(FILE)
