@@ -153,7 +153,7 @@ def main(file):
         columns=["rent", "area", "rooms", "bezirk_no", "city", "url"]
     )
 
-    for idx, apartment in enumerate(apartment_list[:15]):
+    for idx, apartment in enumerate(apartment_list):
         print(f"Processing id: {idx}")
 
         # Fetching typically 0.7 seconds
