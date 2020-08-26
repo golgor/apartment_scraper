@@ -133,7 +133,11 @@ def parse_city(quick_fact_list: list) -> str:
 
 
 def parse_bezirk_name(quick_fact_list: list) -> str:
-    return re.sub("[^A-Za-z]", "", quick_fact_list[2])
+    try:
+        return re.sub("[^A-Za-z]", "", quick_fact_list[2])
+    except Exception:
+        logger.info(f"{quick_fact_list} - No bezirk name found")
+        return ""
 
 
 def parse_address(quick_fact_list: list) -> str:
