@@ -1,5 +1,7 @@
 import logging
 import re
+from time import perf_counter
+import concurrent.futures
 
 import pandas as pd
 import requests
@@ -141,7 +143,17 @@ class Apartment:
         self.bezirk, self.city = get_location(quickfacts)
 
 
+def fetch(apartment):
+    apartment.fetch_data()
+
+
+def process(apartment):
+    apartment.process_data()
+
+
+# 494.63402340000175 seconds without threading
 def main(file):
+    start = perf_counter()
     with open(file) as f:
         apartment_list = [
             Apartment(apartment)
@@ -153,10 +165,10 @@ def main(file):
         columns=["rent", "area", "rooms", "bezirk_no", "city", "url"]
     )
 
+    # 10.29 for 15 items
     for idx, apartment in enumerate(apartment_list):
         print(f"Processing id: {idx}")
-
-        # Fetching typically 0.7 seconds
+        # Fetching data is about 0.3-0.4 seconds, Parsing with bs4 is 0.3s
         apartment.fetch_data()
 
         # Processing typically 200µs
@@ -170,10 +182,44 @@ def main(file):
             apartment.city,
             apartment.url
         )
+    data.to_excel("apartments.xlsx")
+    print(f"Time without threading: {perf_counter() - start}")
+
+
+# 247.99692840000353 seconds with Threading
+def main_threading(file):
+    start = perf_counter()
+    with open(file) as f:
+        apartment_list = [
+            Apartment(apartment)
+            for apartment
+            in f.read().split("\n")[:-1]
+        ]
+
+    data = pd.DataFrame(
+        columns=["rent", "area", "rooms", "bezirk_no", "city", "url"]
+    )
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        executor.map(fetch, apartment_list)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        executor.map(process, apartment_list)
+
+    for idx, apartment in enumerate(apartment_list):
+        data.loc[idx] = (
+            apartment.rent,
+            apartment.area,
+            apartment.rooms,
+            apartment.bezirk,
+            apartment.city,
+            apartment.url
+        )
 
     data.to_excel("apartments.xlsx")
+    print(f"Time with threading: {perf_counter() - start}")
 
 
 FILE = "apartments.txt"
 if __name__ == "__main__":
-    main(FILE)
+    main_threading(FILE)
