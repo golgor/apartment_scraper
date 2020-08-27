@@ -182,7 +182,7 @@ def process(apartment):
 # ~268s with threading with 15 workers without ProcessPool
 # ~143 with threading with 2 workers with ProcessPool with 16 workers
 def main(file):
-    start = perf_counter()
+    start_main = perf_counter()
     with open(file) as f:
         apartment_list = [
             Apartment(apartment)
@@ -195,21 +195,19 @@ def main(file):
     )
 
     print("Started fetching".center(50, "="))
-    start_io = perf_counter()
+    start_fetching = perf_counter()
     # Using threading with IO Bound fetching of data.
     # High amount of workers lead to that Connections are refused.
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         executor.map(fetch, apartment_list)
-    print(f"Done fetching data in: {perf_counter() - start_io}")
-
-    # with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
-    #     executor.map(process, apartment_list[:15])
+    end_fetching = perf_counter()
 
     print("Started processing".center(50, "="))
-    start_process = perf_counter()
+    start_processing = perf_counter()
+    # Using multiprocessing for CPU Bound Parsing and regex pattern finding.
     with concurrent.futures.ProcessPoolExecutor(max_workers=16) as executor:
         results = executor.map(process, apartment_list)
-    print(f"Time for processing: {perf_counter() - start_process}")
+    end_processing = perf_counter()
 
     start_save = perf_counter()
     for result, apartment in zip(results, apartment_list):
@@ -228,10 +226,13 @@ def main(file):
             apartment.city,
             apartment.url
         )
-
-    print(f"Time for saving data: {perf_counter() - start_save}")
     data.to_excel("apartments.xlsx")
-    print(f"Time with threading: {perf_counter() - start}")
+    end_saving = perf_counter()
+
+    print(f"Time for fetching data: {end_fetching - start_fetching}")
+    print(f"Time for processing: {end_processing - start_processing}")
+    print(f"Time for saving data: {end_saving - start_save}")
+    print(f"Time since start: {perf_counter() - start_main}")
 
 
 FILE = "apartments.txt"
