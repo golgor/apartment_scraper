@@ -132,3 +132,5 @@ dmypy.json
 apartments.log
 apartments.txt
 apartments.xlsx
+apartments.csv
+apps.xlsx

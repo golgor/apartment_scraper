@@ -1,8 +1,8 @@
 import scraper
 
 
-# URL = "https://www.immowelt.at/liste/wien/wohnungen/mieten"
-URL = "https://www.immowelt.at/liste/wien-10-favoriten/wohnungen/mieten"
+URL = "https://www.immowelt.at/liste/wien/wohnungen/mieten"
+# URL = "https://www.immowelt.at/liste/wien-10-favoriten/wohnungen/mieten"
 
 
 def main():

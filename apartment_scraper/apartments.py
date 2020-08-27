@@ -95,7 +95,7 @@ def get_value_with_regex(div: str, regex: str) -> str:
         value = re.search(regex, div).group()
 
         # Only return numeric values, i.e. strip any €, m² and similar.
-        return re.sub("[^0-9,]", "", value)
+        return float(re.sub("[^0-9,]", "", value).replace(",", "."))
     except AttributeError as e:
         # This error will occur if no expression is found. re.search
         # will return None which does not have the attribute 'group'
@@ -115,7 +115,7 @@ def stringify_div(div):
 
 def get_location(div):
     if div is None:
-        return None, None
+        return 0, None
     location_list = div.text.split()
     return location_list[0][1:3], location_list[1]
 
@@ -166,6 +166,7 @@ class Apartment:
 
         quickfacts = get_div(self.quickfacts, "span", "no_s")
         self.bezirk, self.city = get_location(quickfacts)
+        self.bezirk = int(self.bezirk)
 
 
 def fetch(apartment):
@@ -180,7 +181,18 @@ def process(apartment):
 
 # ~264s with threading  with 10 workers without ProcessPool
 # ~268s with threading with 15 workers without ProcessPool
-# ~143 with threading with 2 workers with ProcessPool with 16 workers
+
+# with 2 workers with ProcessPool with 16 workers. ~650 items
+# Time for fetching data: 119.40933409999707
+# Time for processing: 25.59249959999579
+# Time for saving data: 1.2901472999947146
+# Time since start: 146.30282830000215
+
+#with 2 workers with ProcessPool with 16 workers. ~6998 items
+# Time for fetching data: 1969.1336764000007
+# Time for processing: 266.7142402999889
+# Time for saving data: 16.85627160000149
+# Time since start: 2252.713053300002
 def main(file):
     start_main = perf_counter()
     with open(file) as f:
@@ -226,7 +238,7 @@ def main(file):
             apartment.city,
             apartment.url
         )
-    data.to_excel("apartments.xlsx")
+    data.to_csv("apartments.csv", decimal=".")
     end_saving = perf_counter()
 
     print(f"Time for fetching data: {end_fetching - start_fetching}")
