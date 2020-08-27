@@ -43,9 +43,12 @@ def get_source(apartment) -> BeautifulSoup:
     try:
         r = requests.get(apartment.url)
         # Todo, check for http-status?
-        return BeautifulSoup(r.content, features="html.parser")
-    except Exception:
-        logger.error("Couldn't not find source and convert to"
+        print(f"Fetching source: {apartment.url}")
+        return r.content
+    except requests.exceptions.ConnectionError:
+        logger.error("Connection refused by target server.")
+    except Exception as e:
+        logger.error(f"Couldn't not find source {e}"
                      f"soup for object {apartment.url}.")
         return None
 
@@ -128,12 +131,34 @@ class Apartment:
 
     def fetch_data(self):
         """Function to fetch the data and specific divs
+
+        Typically 0.3 - 0.4 seconds (IO Bound)
         """
-        self.soup = get_source(self)
+        self.source = get_source(self)
+
+    def parse_data(self):
+        """Function to parse the data using Beautifulsoups HTML-parser
+        and finding specific divs.
+
+        Typical time consumption: 0.36-0.4 seconds (CPU bound)
+        """
+        try:
+            self.soup = BeautifulSoup(self.source, features="html.parser")
+        except Exception:
+            self.soup = None
+
         self.quickfacts = get_div(self.soup, "div", "quickfacts iw_left")
         self.hardfacts = get_div(self.soup, "div", "hardfacts clear")
 
     def process_data(self):
+        """Processing the soups and finding specific expressions using regex.
+
+        Note: Timing is excluding the parse_data() call at the start
+        of the function.
+        Typical time consumption: 200-300µs (CPU Bound)
+        """
+        self.parse_data()
+
         hardfacts = stringify_div(self.hardfacts)
         self.rent = get_value_with_regex(div=hardfacts, regex="[0-9,]+€")
         self.area = get_value_with_regex(div=hardfacts, regex="([0-9,]+)m")
@@ -149,9 +174,13 @@ def fetch(apartment):
 
 def process(apartment):
     apartment.process_data()
+    return (apartment.rent, apartment.area, apartment.rooms,
+            apartment.bezirk, apartment.city)
 
 
-# 494.63402340000175 seconds without threading
+# ~264s with threading  with 10 workers without ProcessPool
+# ~268s with threading with 15 workers without ProcessPool
+# ~143 with threading with 2 workers with ProcessPool with 16 workers
 def main(file):
     start = perf_counter()
     with open(file) as f:
@@ -165,46 +194,30 @@ def main(file):
         columns=["rent", "area", "rooms", "bezirk_no", "city", "url"]
     )
 
-    # 10.29 for 15 items
-    for idx, apartment in enumerate(apartment_list):
-        print(f"Processing id: {idx}")
-        # Fetching data is about 0.3-0.4 seconds, Parsing with bs4 is 0.3s
-        apartment.fetch_data()
-
-        # Processing typically 200µs
-        apartment.process_data()
-
-        data.loc[idx] = (
-            apartment.rent,
-            apartment.area,
-            apartment.rooms,
-            apartment.bezirk,
-            apartment.city,
-            apartment.url
-        )
-    data.to_excel("apartments.xlsx")
-    print(f"Time without threading: {perf_counter() - start}")
-
-
-# 247.99692840000353 seconds with Threading
-def main_threading(file):
-    start = perf_counter()
-    with open(file) as f:
-        apartment_list = [
-            Apartment(apartment)
-            for apartment
-            in f.read().split("\n")[:-1]
-        ]
-
-    data = pd.DataFrame(
-        columns=["rent", "area", "rooms", "bezirk_no", "city", "url"]
-    )
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+    print("Started fetching".center(50, "="))
+    start_io = perf_counter()
+    # Using threading with IO Bound fetching of data.
+    # High amount of workers lead to that Connections are refused.
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         executor.map(fetch, apartment_list)
+    print(f"Done fetching data in: {perf_counter() - start_io}")
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        executor.map(process, apartment_list)
+    # with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
+    #     executor.map(process, apartment_list[:15])
+
+    print("Started processing".center(50, "="))
+    start_process = perf_counter()
+    with concurrent.futures.ProcessPoolExecutor(max_workers=16) as executor:
+        results = executor.map(process, apartment_list)
+    print(f"Time for processing: {perf_counter() - start_process}")
+
+    start_save = perf_counter()
+    for result, apartment in zip(results, apartment_list):
+        apartment.rent = result[0]
+        apartment.area = result[1]
+        apartment.rooms = result[2]
+        apartment.bezirk = result[3]
+        apartment.city = result[4]
 
     for idx, apartment in enumerate(apartment_list):
         data.loc[idx] = (
@@ -216,10 +229,11 @@ def main_threading(file):
             apartment.url
         )
 
+    print(f"Time for saving data: {perf_counter() - start_save}")
     data.to_excel("apartments.xlsx")
     print(f"Time with threading: {perf_counter() - start}")
 
 
 FILE = "apartments.txt"
 if __name__ == "__main__":
-    main_threading(FILE)
+    main(FILE)
