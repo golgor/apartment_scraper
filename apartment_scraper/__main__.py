@@ -1,11 +1,15 @@
 import requests
+import willhaben
 from requester import get_request
-from willhaben.request import WillhabenRequestObject
 
 
 def request_willhaben() -> requests.Response:
-    wh = WillhabenRequestObject()
+    wh = willhaben.RequestObject()
     return get_request(wh)
+
+
+def parse_willhaben():
+    pass
 
 
 def main():

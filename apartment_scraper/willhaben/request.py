@@ -1,4 +1,4 @@
-class WillhabenRequestObject:
+class RequestObject:
     def __init__(self):
         pass
 
