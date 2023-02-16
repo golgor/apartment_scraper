@@ -17,7 +17,7 @@ class RequestObject(Protocol):
         ...
 
     @property
-    def params(self) -> dict[str, str]:
+    def params(self) -> dict[str, str | int]:
         ...
 
 

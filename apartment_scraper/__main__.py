@@ -1,12 +1,15 @@
-import scraper
+import requests
+from requester import get_request
+from willhaben.request import WillhabenRequestObject
 
 
-URL = "https://www.immowelt.at/liste/wien/wohnungen/mieten"
-# URL = "https://www.immowelt.at/liste/wien-10-favoriten/wohnungen/mieten"
+def request_willhaben() -> requests.Response:
+    wh = WillhabenRequestObject()
+    return get_request(wh)
 
 
 def main():
-    scraper.scrape_immowelt(URL)
+    pass
 
 
 if __name__ == "__main__":
