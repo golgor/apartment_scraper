@@ -1,15 +1,10 @@
-import requests
+import json
+from datetime import datetime
+from time import sleep
+
 import willhaben
-from requester import get_request
 
-
-def request_willhaben() -> requests.Response:
-    wh = willhaben.RequestObject()
-    return get_request(wh)
-
-
-def parse_willhaben():
-    pass
+from apartment_scraper import pkg_path
 
 
 def main():
@@ -17,4 +12,14 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    wh = willhaben.Requester()
+    today = datetime.now().strftime("%Y-%m-%d")
+    test = []
+    for data in wh:
+        sleep(1)
+        test.extend(data)
+
+    filepath = pkg_path.joinpath("data", f"willhaben_{today}.json")
+    with open(filepath, "w") as f:
+        f.write(json.dumps(test, indent=2))
+        print(f"Successfully saved {len(test)}")
