@@ -219,7 +219,7 @@ def export_to_json(apartments: list[Apartment], filename: str) -> None:
 
 
 def import_json(filename: str) -> list[dict[str, Any]]:
-    filepath = pkg_path.joinpath("data", filename)
+    filepath = pkg_path.joinpath("willhaben", "raw_data", filename)
     with open(filepath, "r") as f:
         return json.load(f)
 
