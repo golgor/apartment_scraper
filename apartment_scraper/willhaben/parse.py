@@ -224,6 +224,17 @@ def import_raw_json(filename: str) -> list[dict[str, Any]]:
         return json.load(f)
 
 
+def import_clean_json(filename: str) -> list[Apartment]:
+    filepath = pkg_path.joinpath("willhaben", "clean_data", filename)
+    with open(filepath, "r") as f:
+        data: dict[str, Any] = json.load(f)
+
+    return [
+        Apartment(id=id, **apartment_data)
+        for id, apartment_data in data.items()
+    ]
+
+
 def main():
     file_name = "willhaben_2023-02-17.json"
     raw_data = import_raw_json(file_name)
