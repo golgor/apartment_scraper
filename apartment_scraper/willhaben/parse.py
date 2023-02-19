@@ -1,7 +1,8 @@
+import csv
 import json
 from dataclasses import dataclass, field
 from enum import Enum, StrEnum
-from typing import Any
+from typing import Any, Iterable
 
 from apartment_scraper import pkg_path
 
