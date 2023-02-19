@@ -127,13 +127,13 @@ class Apartment:
     # broker: str = ""
     post_code: str
 
-    # @property
-    # def price_per_area(self):
-    #     try:
-    #         return self.price / self.area
-    #     except Exception:
-    #         print("Division by zero")
-    #         return 0
+    @property
+    def price_per_area(self):
+        try:
+            return self.price / self.area
+        except Exception:
+            print("Division by zero")
+            return 0
 
 
 def get_status(response: dict[str, Any]) -> str:
