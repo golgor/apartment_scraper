@@ -121,7 +121,7 @@ class Apartment:
     url: str = field(repr=False)
     # coordinates: tuple[float, float]
     rooms: int
-    # floor: int
+    floor: int
     # address: str
     # broker: str = ""
     post_code: str
@@ -129,14 +129,14 @@ class Apartment:
     @property
     def price_per_area(self):
         try:
-            return self.price / self.area
+            return round(self.price / self.area, 0)
         except Exception:
             print("Division by zero")
             return 0
 
-
-def get_status(response: dict[str, Any]) -> str:
-    return response["advertStatus"]["id"]
+    @property
+    def columns(self) -> Iterable[str]:
+        return ["area", "price", "url", "rooms", "post_code", "price_per_area"]
 
 
 def parse_willhaben_response(
@@ -153,12 +153,31 @@ def parse_willhaben_response(
                     url=parser.url,
                     post_code=parser.postcode,
                     rooms=parser.rooms,
+                    floor=parser.floor,
                 )
             )
     return apartment_list
 
 
-def import_json(filename: str) -> dict[str, Any]:
+def export_apartments_to_csv(apartments: list[Apartment]) -> None:
+    # Example.csv gets created in the current working directory
+    with open("Example.csv", "w", newline="\n") as csvfile:
+        my_writer = csv.writer(csvfile, delimiter=",")
+        my_writer.writerow(apartments[0].columns)
+        for apartment in apartments:
+            my_writer.writerow(
+                (
+                    apartment.area,
+                    apartment.price,
+                    apartment.url,
+                    apartment.rooms,
+                    apartment.post_code,
+                    apartment.price_per_area,
+                )
+            )
+
+
+def import_json(filename: str) -> list[dict[str, Any]]:
     filepath = pkg_path.joinpath("data", filename)
     with open(filepath, "r") as f:
         return json.load(f)
