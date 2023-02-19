@@ -39,89 +39,117 @@ class PostCodeWien(StrEnum):
     LIESING = "1230"
 
 
+class FieldParser:
+    def __init__(self, response: dict[str, Any]):
+        self.response = response
+        self.attributes: list[dict[str, Any]] = response["attributes"][
+            "attribute"
+        ]
+
+    def get_attr(self, name: str) -> list[str]:
+        for attribute in self.attributes:
+            if attribute.get("name") == name:
+                return attribute["values"]
+        raise KeyError(f"Attribute {name} not found!")
+
+    @property
+    def price(self) -> float:
+        try:
+            return float(self.get_attr("PRICE")[0])
+        except Exception:
+            print(
+                "Failed to parse the field 'PRICE' for "
+                f"id={self.response['id']}, "
+                f"url={self.url}"
+            )
+            return 0
+
+    @property
+    def area(self) -> float:
+        try:
+            return float(self.get_attr("ESTATE_SIZE/LIVING_AREA")[0])
+        except Exception:
+            print(
+                "Failed to parse the field 'ESTATE_SIZE/LIVING_AREA' for "
+                f"id={self.response['id']}, "
+                f"url={self.url}"
+            )
+            return 0
+
+    @property
+    def url(self) -> str:
+        try:
+            return (
+                f"https://www.willhaben.at/iad/{self.get_attr('SEO_URL')[0]}"
+            )
+        except Exception:
+            print(
+                "Failed to parse the field 'SEO_URL' for "
+                f"id={self.response['id']}"
+            )
+            return ""
+
+    @property
+    def product_id(self) -> ProductId:
+        return ProductId(self.response.get("productId", 0))
+
+    @property
+    def postcode(self) -> PostCodeWien:
+        try:
+            postcode = self.get_attr("POSTCODE")[0]
+            return PostCodeWien(postcode)
+        except KeyError as e:
+            print(e)
+            return PostCodeWien("0")
+
+    @property
+    def rooms(self) -> int:
+        try:
+            return int(self.get_attr("NUMBER_OF_ROOMS")[0])
+        except Exception as e:
+            print(e)
+            return 0
+
 
 @dataclass
 class Apartment:
-    # area: float
+    area: float
     price: float
-    url: str
+    url: str = field(repr=False)
     # coordinates: tuple[float, float]
     rooms: int
     # floor: int
     # address: str
     # broker: str = ""
+    post_code: str
 
     # @property
     # def price_per_area(self):
-    #     return self.price / self.area
+    #     try:
+    #         return self.price / self.area
+    #     except Exception:
+    #         print("Division by zero")
+    #         return 0
 
 
 def get_status(response: dict[str, Any]) -> str:
     return response["advertStatus"]["id"]
 
 
-def get_attributes(response: dict[str, Any]) -> dict[str, Any]:
-    attributes: list[dict[str, Any]] = response["attributes"]["attribute"]
-    keys_of_interest = [
-        "LOCATION",
-        "POSTCODE",
-        "STATE",
-        "ORGNAME",
-        "ESTATE_SIZE/LIVING_AREA",
-        "DISTRICT",
-        "LOCATION_QUALITY",
-        "FLOOR",
-        "PROPERTY_TYPE",
-        "NUMBER_OF_ROOMS",
-        "SEO_URL",
-        "FREE_AREA_TYPE",
-        "FREE_AREA_TYPE_NAME",
-        "FREE_AREA/FREE_AREA_AREA_TOTAL",
-        "PUBLISHED_String",
-        "ESTATE_PRICE/PRICE_SUGGESTION",
-        "ESTATE_SIZE/USEABLE_AREA",
-        "ADDRESS",
-        "COORDINATES",
-        "PRICE",
-        "PRICE_FOR_DISPLAY",
-        "ESTATE_SIZE",
-    ]
-    filtered_attributes = {
-        item["name"]: item["values"]
-        for item in attributes
-        if item["name"] in keys_of_interest
-    }
-    # Unpacking values if in a list and only one element
-    return {
-        key: value[0] if len(value) == 1 else value
-        for key, value in filtered_attributes.items()
-    }
-
-
-def parse_price(attributes: dict[str, Any]) -> float:
-    return float(attributes.get("PRICE", 0))
-
-
-def parse_willhaben_response(raw_responses: dict[str, Any]) -> list[Apartment]:
-    responses = raw_responses["advertSummaryList"]["advertSummary"]
+def parse_willhaben_response(
+    responses: list[dict[str, Any]]
+) -> list[Apartment]:
     apartment_list: list[Apartment] = []
     for response in responses:
         if get_status(response) == "active":
-            attributes = get_attributes(response)
-            # Add parsing functions for each attribute, sometimes they don't
-            # exist, sometimes under one or several attributes or not
-            # available.
-            parse_price(attributes=attributes)
+            parser = FieldParser(response=response)
             apartment_list.append(
                 Apartment(
-                    # area=float(attributes["ESTATE_SIZE/LIVING_AREA"]),
-                    price=parse_price(attributes),
-                    url=f"https://www.willhaben.at/iad/{attributes['SEO_URL']}",
-                    # coordinates=attributes["COORDINATES"],
-                    rooms=int(attributes["NUMBER_OF_ROOMS"]),
-                    # floor=int(attributes["FLOOR"]),
-                    # address=attributes["ADDRESS"],
-                    # broker=attributes["ORGNAME"],
+                    price=parser.price,
+                    area=parser.area,
+                    url=parser.url,
+                    post_code=parser.postcode,
+                    rooms=parser.rooms,
                 )
             )
     return apartment_list
