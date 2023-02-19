@@ -46,16 +46,19 @@ class FieldParser:
             "attribute"
         ]
 
-    def get_attr(self, name: str) -> list[str]:
+    def get_attr(self, name: str, fallback: Any = None) -> Any:
+        # sourcery skip: use-next, useless-else-on-loop
         for attribute in self.attributes:
-            if attribute.get("name") == name:
-                return attribute["values"]
-        raise KeyError(f"Attribute {name} not found!")
+            if attribute["name"] == name:
+                return attribute["values"][0]
+        else:
+            return fallback
 
     @property
     def price(self) -> float:
         try:
-            return float(self.get_attr("PRICE")[0])
+            price = self.get_attr("PRICE", 0)
+            return float(price)
         except Exception:
             print(
                 "Failed to parse the field 'PRICE' for "
@@ -67,7 +70,7 @@ class FieldParser:
     @property
     def area(self) -> float:
         try:
-            return float(self.get_attr("ESTATE_SIZE/LIVING_AREA")[0])
+            return float(self.get_attr("ESTATE_SIZE/LIVING_AREA", 0))
         except Exception:
             print(
                 "Failed to parse the field 'ESTATE_SIZE/LIVING_AREA' for "
@@ -79,9 +82,10 @@ class FieldParser:
     @property
     def url(self) -> str:
         try:
-            return (
-                f"https://www.willhaben.at/iad/{self.get_attr('SEO_URL')[0]}"
-            )
+            if url := self.get_attr("SEO_URL", ""):
+                return f"https://www.willhaben.at/iad/{url}"
+            else:
+                raise ValueError
         except Exception:
             print(
                 "Failed to parse the field 'SEO_URL' for "
@@ -95,24 +99,19 @@ class FieldParser:
 
     @property
     def postcode(self) -> PostCodeWien:
-        try:
-            postcode = self.get_attr("POSTCODE")[0]
-            return PostCodeWien(postcode)
-        except KeyError as e:
-            print(e)
-            return PostCodeWien("0")
+        return PostCodeWien(self.get_attr(name="POSTCODE", fallback="0"))
 
     @property
     def rooms(self) -> int:
-        try:
-            return int(self.get_attr("NUMBER_OF_ROOMS")[0])
-        except Exception as e:
-            print(e)
-            return 0
+        return int(self.get_attr("NUMBER_OF_ROOMS", 0))
 
     @property
     def active(self) -> bool:
         return self.response["advertStatus"]["id"] == "active"
+
+    @property
+    def floor(self) -> int:
+        return self.get_attr("FLOOR", 0)
 
 
 @dataclass
