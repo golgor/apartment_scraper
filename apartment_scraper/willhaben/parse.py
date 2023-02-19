@@ -201,6 +201,14 @@ def export_apartments_to_csv(apartments: list[Apartment]) -> None:
             )
 
 
+def export_to_json(apartments: list[Apartment], filename: str) -> None:
+    apartment_dict = {
+        apartment.id: apartment.to_json() for apartment in apartments
+    }
+    with open(filename, "w") as f:
+        f.write(json.dumps(apartment_dict, indent=2))
+
+
 def import_json(filename: str) -> list[dict[str, Any]]:
     filepath = pkg_path.joinpath("data", filename)
     with open(filepath, "r") as f:
