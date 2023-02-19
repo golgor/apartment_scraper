@@ -112,7 +112,14 @@ class FieldParser:
 
     @property
     def floor(self) -> int:
-        return self.get_attr("FLOOR", 0)
+        try:
+            return int(self.get_attr("FLOOR", 0))
+        except Exception:
+            print(
+                "Failed to parse the field 'FLOOR' for "
+                f"id={self.response['id']}"
+            )
+            return 0
 
     @property
     def id(self) -> str:
