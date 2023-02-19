@@ -210,10 +210,11 @@ def export_apartments_to_csv(apartments: list[Apartment]) -> None:
 
 
 def export_to_json(apartments: list[Apartment], filename: str) -> None:
+    path = pkg_path.joinpath("clean_data", filename)
     apartment_dict = {
         apartment.id: apartment.to_json() for apartment in apartments
     }
-    with open(filename, "w") as f:
+    with open(path, "w") as f:
         f.write(json.dumps(apartment_dict, indent=2))
 
 
@@ -224,11 +225,11 @@ def import_json(filename: str) -> list[dict[str, Any]]:
 
 
 def main():
-    file_name = "willhaben_2023-02-19.json"
+    file_name = "willhaben_2023-02-17.json"
     raw_data = import_json(file_name)
     apartments = parse_willhaben_response(raw_data)
     # export_apartments_to_csv(apartments)
-    export_to_json(apartments, f"cleaned_{file_name}")
+    export_to_json(apartments, file_name)
 
 
 if __name__ == "__main__":
