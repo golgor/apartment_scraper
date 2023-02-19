@@ -1,9 +1,8 @@
-import csv
-import json
 from enum import Enum, StrEnum
 from typing import Any
 
-from apartment_scraper import Apartment, Site, pkg_path
+from apartment_scraper import Apartment, Site
+from apartment_scraper.data_exporter import DataExporter
 from apartment_scraper.data_loader import DataLoader
 
 
@@ -38,10 +37,6 @@ class PostCodeWien(StrEnum):
     FLORIDSDORF = "1210"
     DONAUSTADT = "1220"
     LIESING = "1230"
-
-
-# class Site(StrEnum):
-#     WILLHABEN = "willhaben"
 
 
 class FieldParser:
@@ -151,48 +146,18 @@ def parse_willhaben_response(
     return apartment_list
 
 
-def export_apartments_to_csv(apartments: list[Apartment]) -> None:
-    # Example.csv gets created in the current working directory
-    with open("Example.csv", "w", newline="\n") as csvfile:
-        my_writer = csv.writer(csvfile, delimiter=",")
-        my_writer.writerow(apartments[0].columns)
-        for apartment in apartments:
-            my_writer.writerow(
-                (
-                    apartment.area,
-                    apartment.price,
-                    apartment.url,
-                    apartment.rooms,
-                    apartment.post_code,
-                    apartment.price_per_area,
-                )
-            )
-
-
-def export_to_json(apartments: list[Apartment], filename: str) -> None:
-    path = pkg_path.joinpath("willhaben", "clean_data", filename)
-    apartment_dict = {
-        apartment.id: apartment.to_json() for apartment in apartments
-    }
-    with open(path, "w") as f:
-        f.write(json.dumps(apartment_dict, indent=2))
-
-
-def import_raw_json(filename: str) -> list[dict[str, Any]]:
-    filepath = pkg_path.joinpath("willhaben", "raw_data", filename)
-    with open(filepath, "r") as f:
-        return json.load(f)
-
-
 def main():
     file_name = "willhaben_2023-02-17.json"
-    data_loader = DataLoader(site=Site.WILLHABEN)
-    # raw_data = import_raw_json(file_name)
-    # apartments = parse_willhaben_response(raw_data)
+    dl = DataLoader(site=Site.WILLHABEN)
+    de = DataExporter(site=Site.WILLHABEN)
+    raw_data = dl.load_raw_data(file_name)
+    apartments = parse_willhaben_response(raw_data)
     # export_apartments_to_csv(apartments)
+    # de.export_excel("test.csv", apartments)
+    de.export_json(file_name, apartments)
     # export_to_json(apartments, file_name)
-    apartments = data_loader.load_clean_data(filename=file_name)
-    export_apartments_to_csv(apartments)
+    # apartments = dl.load_clean_data(filename=file_name)
+    # export_apartments_to_csv(apartments)
 
 
 if __name__ == "__main__":
