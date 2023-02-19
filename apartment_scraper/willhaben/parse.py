@@ -1,8 +1,43 @@
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import Enum, StrEnum
 from typing import Any
 
 from apartment_scraper import pkg_path
+
+
+class ProductId(Enum):
+    UNDEFINED = 0
+    NEUBAU = 270
+    EIGENTUMSWOHNUNG = 223
+
+
+class PostCodeWien(StrEnum):
+    UNDEFINED = "0"
+    INNERE_STADT = "1010"
+    LEOPOLDSTADT = "1020"
+    LANDSTRASSE = "1030"
+    WIEDEN = "1040"
+    MARGARETEN = "1050"
+    MARIAHILF = "1060"
+    NEUBAU = "1070"
+    JOSEFSTADT = "1080"
+    ALSERGRUND = "1090"
+    FAVORITEN = "1100"
+    SIMMERING = "1110"
+    MEIDLING = "1120"
+    HIETZING = "1130"
+    PENZING = "1140"
+    RUDOLFSHEIM_FUNFHAUS = "1150"
+    OTTAKRING = "1160"
+    HERNALS = "1170"
+    WÄHRING = "1180"
+    DÖBLING = "1190"
+    BRIGITTENAU = "1200"
+    FLORIDSDORF = "1210"
+    DONAUSTADT = "1220"
+    LIESING = "1230"
+
 
 
 @dataclass
