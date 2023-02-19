@@ -216,10 +216,11 @@ def import_json(filename: str) -> list[dict[str, Any]]:
 
 
 def main():
-    raw_data = import_json("willhaben_wien.json")
+    file_name = "willhaben_2023-02-19.json"
+    raw_data = import_json(file_name)
     apartments = parse_willhaben_response(raw_data)
-    for apartment in apartments:
-        print(apartment)
+    # export_apartments_to_csv(apartments)
+    export_to_json(apartments, f"cleaned_{file_name}")
 
 
 if __name__ == "__main__":
