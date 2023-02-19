@@ -110,6 +110,10 @@ class FieldParser:
             print(e)
             return 0
 
+    @property
+    def active(self) -> bool:
+        return self.response["advertStatus"]["id"] == "active"
+
 
 @dataclass
 class Apartment:
@@ -141,8 +145,8 @@ def parse_willhaben_response(
 ) -> list[Apartment]:
     apartment_list: list[Apartment] = []
     for response in responses:
-        if get_status(response) == "active":
-            parser = FieldParser(response=response)
+        parser = FieldParser(response=response)
+        if parser.active:
             apartment_list.append(
                 Apartment(
                     price=parser.price,
