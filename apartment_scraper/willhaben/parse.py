@@ -113,9 +113,14 @@ class FieldParser:
     def floor(self) -> int:
         return self.get_attr("FLOOR", 0)
 
+    @property
+    def id(self) -> str:
+        return self.response["id"]
+
 
 @dataclass
 class Apartment:
+    id: str
     area: float
     price: float
     url: str = field(repr=False)
@@ -136,7 +141,25 @@ class Apartment:
 
     @property
     def columns(self) -> Iterable[str]:
-        return ["area", "price", "url", "rooms", "post_code", "price_per_area"]
+        return [
+            "id",
+            "area",
+            "price",
+            "url",
+            "rooms",
+            "post_code",
+            "price_per_area",
+        ]
+
+    def to_json(self):
+        return {
+            "area": self.area,
+            "price": self.price,
+            "url": self.url,
+            "rooms": self.rooms,
+            "floor": self.floor,
+            "post_code": self.post_code,
+        }
 
 
 def parse_willhaben_response(
@@ -148,6 +171,7 @@ def parse_willhaben_response(
         if parser.active:
             apartment_list.append(
                 Apartment(
+                    id=parser.id,
                     price=parser.price,
                     area=parser.area,
                     url=parser.url,
