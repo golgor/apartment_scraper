@@ -1,10 +1,10 @@
 import csv
 import json
-from dataclasses import dataclass, field
 from enum import Enum, StrEnum
-from typing import Any, Iterable
+from typing import Any
 
-from apartment_scraper import pkg_path
+from apartment_scraper import Apartment, Site, pkg_path
+from apartment_scraper.data_loader import DataLoader
 
 
 class ProductId(Enum):
@@ -38,6 +38,10 @@ class PostCodeWien(StrEnum):
     FLORIDSDORF = "1210"
     DONAUSTADT = "1220"
     LIESING = "1230"
+
+
+# class Site(StrEnum):
+#     WILLHABEN = "willhaben"
 
 
 class FieldParser:
@@ -126,50 +130,6 @@ class FieldParser:
         return self.response["id"]
 
 
-@dataclass
-class Apartment:
-    id: str
-    area: float
-    price: float
-    url: str = field(repr=False)
-    # coordinates: tuple[float, float]
-    rooms: int
-    floor: int
-    # address: str
-    # broker: str = ""
-    post_code: str
-
-    @property
-    def price_per_area(self):
-        try:
-            return round(self.price / self.area, 0)
-        except Exception:
-            print("Division by zero")
-            return 0
-
-    @property
-    def columns(self) -> Iterable[str]:
-        return [
-            "id",
-            "area",
-            "price",
-            "url",
-            "rooms",
-            "post_code",
-            "price_per_area",
-        ]
-
-    def to_json(self):
-        return {
-            "area": self.area,
-            "price": self.price,
-            "url": self.url,
-            "rooms": self.rooms,
-            "floor": self.floor,
-            "post_code": self.post_code,
-        }
-
-
 def parse_willhaben_response(
     responses: list[dict[str, Any]]
 ) -> list[Apartment]:
@@ -224,23 +184,15 @@ def import_raw_json(filename: str) -> list[dict[str, Any]]:
         return json.load(f)
 
 
-def import_clean_json(filename: str) -> list[Apartment]:
-    filepath = pkg_path.joinpath("willhaben", "clean_data", filename)
-    with open(filepath, "r") as f:
-        data: dict[str, Any] = json.load(f)
-
-    return [
-        Apartment(id=id, **apartment_data)
-        for id, apartment_data in data.items()
-    ]
-
-
 def main():
     file_name = "willhaben_2023-02-17.json"
-    raw_data = import_raw_json(file_name)
-    apartments = parse_willhaben_response(raw_data)
+    data_loader = DataLoader(site=Site.WILLHABEN)
+    # raw_data = import_raw_json(file_name)
+    # apartments = parse_willhaben_response(raw_data)
     # export_apartments_to_csv(apartments)
-    export_to_json(apartments, file_name)
+    # export_to_json(apartments, file_name)
+    apartments = data_loader.load_clean_data(filename=file_name)
+    export_apartments_to_csv(apartments)
 
 
 if __name__ == "__main__":
