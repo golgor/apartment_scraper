@@ -1,9 +1,7 @@
 from enum import Enum, StrEnum
 from typing import Any
 
-from apartment_scraper import Apartment, Site
-from apartment_scraper.data_exporter import DataExporter
-from apartment_scraper.data_loader import DataLoader
+from apartment_scraper import Apartment
 
 
 class ProductId(Enum):
@@ -144,21 +142,3 @@ def parse_willhaben_response(
                 )
             )
     return apartment_list
-
-
-def main():
-    file_name = "willhaben_2023-02-17.json"
-    dl = DataLoader(site=Site.WILLHABEN)
-    de = DataExporter(site=Site.WILLHABEN)
-    raw_data = dl.load_raw_data(file_name)
-    apartments = parse_willhaben_response(raw_data)
-    # export_apartments_to_csv(apartments)
-    # de.export_excel("test.csv", apartments)
-    de.export_json(file_name, apartments)
-    # export_to_json(apartments, file_name)
-    # apartments = dl.load_clean_data(filename=file_name)
-    # export_apartments_to_csv(apartments)
-
-
-if __name__ == "__main__":
-    main()

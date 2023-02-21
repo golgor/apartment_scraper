@@ -1,18 +1,7 @@
-from typing import Any
-
-import requests
-
-
-class NoConnectionError(Exception):
-    pass
-
-
-class Requester:
-    def __init__(self, rows: int = 200, area_id: int = 900, page: int = 1):
-        self.rows = rows
-        self.area_id = area_id
-        self.page = page
-        self.sum = 0
+class WohnungenWien:
+    def __init__(self, rows: int = 500, page: int = 1):
+        self._rows = rows
+        self._page = page
 
     @property
     def url(self) -> str:
@@ -34,31 +23,19 @@ class Requester:
             ),
         }
 
-    def __iter__(self):
-        return self
+    @property
+    def page(self) -> int:
+        return self._page
 
-    def __next__(self) -> list[dict[str, Any]]:
-        response = self._perform_request()
-        if not response.get("rowsReturned"):
-            raise StopIteration
+    @page.setter
+    def page(self, value: int):
+        self._page = value
 
-        print(f"Successfull request for page {self.page}")
-        self.sum += len(response["advertSummaryList"]["advertSummary"])
-        print(f"Requested {self.sum} / {response['rowsFound']}")
+    @property
+    def area_id(self) -> int:
+        """Area ID denotes what area in Austria. 900 is Wien."""
+        return 900
 
-        self.page += 1
-        return response["advertSummaryList"]["advertSummary"]
-
-    def _perform_request(self) -> dict[str, Any]:
-        try:
-            response = requests.get(
-                url=self.url, headers=self.header, params=self.params
-            )
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            raise NoConnectionError(
-                f"HTTP Error: {e.response.status_code}"
-            ) from e
-        except Exception as e:
-            raise NoConnectionError(e) from e
-        return response.json()
+    @property
+    def rows(self) -> int:
+        return self._rows
