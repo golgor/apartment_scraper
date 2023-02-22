@@ -12,7 +12,7 @@ class DataExporter:
     def export_json(self, filename: str, apartments: list[Apartment]):
         path = pkg_path.joinpath("willhaben", "clean_data", filename)
         apartment_dict = {
-            apartment.id: apartment.to_json() for apartment in apartments
+            apartment.id: apartment.to_dict() for apartment in apartments
         }
         with open(path, "w") as f:
             f.write(json.dumps(apartment_dict, indent=2))

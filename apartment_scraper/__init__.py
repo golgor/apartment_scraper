@@ -42,11 +42,12 @@ class Apartment:
             "price",
             "url",
             "rooms",
+            "floor",
             "post_code",
             "price_per_area",
         ]
 
-    def to_json(self):
+    def to_dict(self):
         return {
             "area": self.area,
             "price": self.price,
@@ -54,4 +55,5 @@ class Apartment:
             "rooms": self.rooms,
             "floor": self.floor,
             "post_code": self.post_code,
+            "price_per_area": self.price_per_area,
         }
