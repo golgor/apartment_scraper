@@ -10,6 +10,15 @@ class DataExporter:
         self._raw_path = pkg_path.joinpath(site.value, "raw_data")
 
     def export_json(self, filename: str, apartments: list[Apartment]):
+        """Export the data to a .JSON file.
+
+        It is structured as a dict containing information about each element.
+        The key is the id, which is assumed to be unique.
+
+        Args:
+            filename (str): The filename to save the data to.
+            apartments (list[Apartment]): A data source to dump.
+        """
         path = pkg_path.joinpath("willhaben", "clean_data", filename)
         apartment_dict = {
             apartment.id: apartment.to_dict() for apartment in apartments
@@ -18,7 +27,12 @@ class DataExporter:
             f.write(json.dumps(apartment_dict, indent=2))
 
     def export_excel(self, filename: str, apartments: list[Apartment]):
-        # Example.csv gets created in the current working directory
+        """Export the data to a .csv file.
+
+        Args:
+            filename (str): The filename to save the data to.
+            apartments (list[Apartment]): A data source to dump.
+        """
         path = pkg_path.joinpath("willhaben", "clean_data", filename)
         with open(path, "w", newline="\n") as csvfile:
             my_writer = csv.writer(csvfile, delimiter=",")
