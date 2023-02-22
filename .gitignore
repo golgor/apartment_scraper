@@ -134,3 +134,6 @@ apartments.txt
 apartments.xlsx
 apartments.csv
 apps.xlsx
+*.json
+*.ods
+*.csv
