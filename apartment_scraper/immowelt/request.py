@@ -1,6 +1,8 @@
 import json
+from datetime import datetime
 
-from apartment_scraper.immowelt import post_request
+from apartment_scraper import pkg_path
+from apartment_scraper.immowelt import get_data, get_immowelt_token
 
 
 class ImmoweltTokenRequest:
@@ -22,9 +24,12 @@ class ImmoweltTokenRequest:
 
 
 class ImmoweltRequest:
-    def __init__(self, access_token: str) -> None:
-        self.access_token = access_token
-        self.bearer_token = f"Bearer {self.access_token}"
+    def __init__(
+        self, bearer_token: str, page: int = 0, rows: int = 500
+    ) -> None:
+        self.bearer_token = bearer_token
+        self._page = page
+        self.rows = rows
 
     @property
     def url(self) -> str:
@@ -38,6 +43,14 @@ class ImmoweltRequest:
             "authorization": self.bearer_token,
             "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
         }
+
+    @property
+    def page(self) -> int:
+        return self._page
+
+    @page.setter
+    def page(self, value: int):
+        self._page = value
 
     @property
     def body(self) -> str:
@@ -64,19 +77,24 @@ class ImmoweltRequest:
                 "zipCode": None,
                 "sort": {"direction": "DESC", "field": "RELEVANCE"},
                 "immoItemTypes": ["ESTATE", "PROJECT"],
-                "paging": {"size": 200, "page": 1},
+                "paging": {"size": self.rows, "page": self.page},
             }
         )
 
 
 def main():
-    token_request = ImmoweltTokenRequest()
-    response = post_request(token_request)
-    access_token = response.json()["access_token"]
-
+    access_token = get_immowelt_token()
     request = ImmoweltRequest(access_token)
-    response = post_request(request)
-    print(response.json())
+
+    test = get_data(request)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    filename = f"immowelt_{today}.json"
+
+    filepath = pkg_path.joinpath("immowelt", "raw_data", filename)
+    with open(filepath, "w") as f:
+        f.write(json.dumps(test, indent=2))
+        print(f"Successfully saved {len(test)}")
 
 
 if __name__ == "__main__":
