@@ -11,6 +11,7 @@ pkg_path = pathlib.Path(__file__).parent.resolve()
 
 class Site(StrEnum):
     WILLHABEN = "willhaben"
+    IMMOWELT = "immowelt"
 
 
 @dataclass
@@ -20,7 +21,7 @@ class Apartment:
     price: float
     url: str = field(repr=False)
     # coordinates: tuple[float, float]
-    rooms: int
+    rooms: float
     floor: int
     # address: str
     # broker: str = ""
@@ -31,13 +32,11 @@ class Apartment:
         try:
             return round(self.price / self.area, 0)
         except Exception:
-            print("Division by zero")
             return 0
 
     @property
     def columns(self) -> Iterable[str]:
         return [
-            "id",
             "area",
             "price",
             "url",
