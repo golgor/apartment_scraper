@@ -20,6 +20,6 @@ class DataLoader:
         ]
 
     def load_raw_data(self, filename: str) -> list[dict[str, Any]]:
-        filepath = self._raw_path.joinpath(filename)
+        filepath = self._raw_path.joinpath(f"{filename}.json")
         with open(filepath, "r") as f:
             return json.load(f)
