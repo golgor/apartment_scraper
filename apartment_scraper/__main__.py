@@ -16,6 +16,17 @@ def get_willhaben_raw_data(filename: str):
         print(f"Successfully saved {len(test)}")
 
 
+def get_immowelt_raw_data(filename: str):
+    access_token = immowelt.get_immowelt_token()
+    request = immowelt.WohnungenWien(access_token)
+
+    test = immowelt.get_data(request)
+
+    filepath = pkg_path.joinpath("immowelt", "raw_data", f"{filename}.json")
+    with open(filepath, "w") as f:
+        f.write(json.dumps(test, indent=2))
+        print(f"Successfully saved {len(test)}")
+
 
 def parse_raw_data(filename: str, site: Site):
     dl = DataLoader(site=site)
