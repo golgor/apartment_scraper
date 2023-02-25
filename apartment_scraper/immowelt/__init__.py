@@ -4,8 +4,9 @@ from typing import Any, Protocol
 import requests
 
 from apartment_scraper.immowelt.parse import parse_immowelt_response
+from apartment_scraper.immowelt.request import WohnungenWien
 
-__all__ = ["parse_immowelt_response"]
+__all__ = ["parse_immowelt_response", "get_immowelt_token", "WohnungenWien"]
 
 
 class NoConnectionError(Exception):

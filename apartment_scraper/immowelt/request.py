@@ -1,29 +1,7 @@
 import json
-from datetime import datetime
-
-from apartment_scraper import pkg_path
-from apartment_scraper.immowelt import get_data, get_immowelt_token
 
 
-class ImmoweltTokenRequest:
-    @property
-    def url(self) -> str:
-        return "https://api.immowelt.com/auth/oauth/token"
-
-    @property
-    def header(self) -> dict[str, str]:
-        return {
-            "accept": "application/json, text/plain, */*",
-            "content-type": "application/x-www-form-urlencoded",
-            "authorization": "Basic cmVzaWRlbnRpYWwtc2VhcmNoLXVpOlU4KzhzYn4oO1E0YlsyUXcjaHl3TSlDcTc=",
-        }
-
-    @property
-    def body(self) -> dict[str, str | int]:
-        return {"grant_type": "client_credentials"}
-
-
-class ImmoweltRequest:
+class WohnungenWien:
     def __init__(
         self, bearer_token: str, page: int = 0, rows: int = 500
     ) -> None:
@@ -80,22 +58,3 @@ class ImmoweltRequest:
                 "paging": {"size": self.rows, "page": self.page},
             }
         )
-
-
-def main():
-    access_token = get_immowelt_token()
-    request = ImmoweltRequest(access_token)
-
-    test = get_data(request)
-
-    today = datetime.now().strftime("%Y-%m-%d")
-    filename = f"immowelt_{today}.json"
-
-    filepath = pkg_path.joinpath("immowelt", "raw_data", filename)
-    with open(filepath, "w") as f:
-        f.write(json.dumps(test, indent=2))
-        print(f"Successfully saved {len(test)}")
-
-
-if __name__ == "__main__":
-    main()
