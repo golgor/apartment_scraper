@@ -1,8 +1,7 @@
-import apartment_scraper.willhaben.parse as parse
 from apartment_scraper.willhaben.parse import parse_willhaben_response
 from apartment_scraper.willhaben.request import WohnungenWien
 
-__all__ = ["parse", "WohnungenWien", "parse_willhaben_response"]
+__all__ = ["WohnungenWien", "parse_willhaben_response"]
 
 from time import sleep
 from typing import Any, Protocol
