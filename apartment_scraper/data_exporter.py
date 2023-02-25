@@ -6,6 +6,7 @@ from apartment_scraper import Apartment, Site, pkg_path
 
 class DataExporter:
     def __init__(self, site: Site):
+        self.site = site
         self._clean_path = pkg_path.joinpath(site.value, "clean_data")
         self._raw_path = pkg_path.joinpath(site.value, "raw_data")
 
@@ -19,7 +20,7 @@ class DataExporter:
             filename (str): The filename to save the data to.
             apartments (list[Apartment]): A data source to dump.
         """
-        path = pkg_path.joinpath("willhaben", "clean_data", filename)
+        path = pkg_path.joinpath(self.site.value, "clean_data", filename)
         apartment_dict = {
             apartment.id: apartment.to_dict() for apartment in apartments
         }
@@ -33,7 +34,7 @@ class DataExporter:
             filename (str): The filename to save the data to.
             apartments (list[Apartment]): A data source to dump.
         """
-        path = pkg_path.joinpath("willhaben", "clean_data", filename)
+        path = pkg_path.joinpath(self.site.value, "clean_data", filename)
         with open(path, "w", newline="\n") as csvfile:
             my_writer = csv.writer(csvfile, delimiter=",")
             my_writer.writerow(apartments[0].columns)
@@ -44,6 +45,7 @@ class DataExporter:
                         apartment.price,
                         apartment.url,
                         apartment.rooms,
+                        apartment.floor,
                         apartment.post_code,
                         apartment.price_per_area,
                     )
