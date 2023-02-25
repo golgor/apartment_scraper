@@ -3,6 +3,10 @@ from typing import Any, Protocol
 
 import requests
 
+from apartment_scraper.immowelt.parse import parse_immowelt_response
+
+__all__ = ["parse_immowelt_response"]
+
 
 class NoConnectionError(Exception):
     pass
