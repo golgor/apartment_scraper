@@ -49,6 +49,20 @@ def parse_raw_data(filename: str, site: Site):
 
 
 if __name__ == "__main__":
-    # filename = "2023-02-24_test"
-    get_willhaben_raw_data(area_id=willhaben.AreaId.WIEN.FLORIDSDORF)
+    areas = [
+        willhaben.AreaId.NIEDERÖSTERREICH.KORNEUBURG,
+        willhaben.AreaId.NIEDERÖSTERREICH.TULLN,
+        willhaben.AreaId.NIEDERÖSTERREICH.GÄNSERNDORF,
+        willhaben.AreaId.NIEDERÖSTERREICH.MISTELBACH,
+        willhaben.AreaId.NIEDERÖSTERREICH.MÖLDLING,
+        willhaben.AreaId.NIEDERÖSTERREICH.KREMS_AN_DER_DONAU,
+        willhaben.AreaId.NIEDERÖSTERREICH.KREMS_LAND,
+        willhaben.AreaId.NIEDERÖSTERREICH.SANKT_PÖLTEN,
+        willhaben.AreaId.NIEDERÖSTERREICH.SANKT_PÖLTEN_LAND,
+        willhaben.AreaId.NIEDERÖSTERREICH.BADEN,
+        willhaben.AreaId.NIEDERÖSTERREICH.WIENER_NEUSTADT,
+        willhaben.AreaId.NIEDERÖSTERREICH.HOLLABRUNN,
+    ]
+    for area in areas:
+        get_willhaben_raw_data(area_id=area)
     # parse_raw_data(today, site=Site.WILLHABEN)
