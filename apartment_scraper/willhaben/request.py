@@ -1,41 +1,71 @@
-class WohnungenWien:
-    def __init__(self, rows: int = 500, page: int = 1):
-        self._rows = rows
-        self._page = page
+from time import sleep
+from typing import Any, Protocol
 
+import requests
+
+
+class NoConnectionError(Exception):
+    pass
+
+
+class WillhabenRequest(Protocol):
     @property
     def url(self) -> str:
-        return (
-            "https://www.willhaben.at/webapi/iad/search/atz/seo/immobilien/"
-            "eigentumswohnung/eigentumswohnung-angebote"
-        )
+        ...
 
     @property
     def params(self) -> dict[str, str | int]:
-        return {"rows": self.rows, "areaId": self.area_id, "page": self.page}
+        ...
 
     @property
     def header(self) -> dict[str, str]:
-        return {
-            "accept": "application/json",
-            "x-wh-client": (
-                "api@willhaben.at;responsive_web;server;1.0.0;desktop"
-            ),
-        }
-
-    @property
-    def page(self) -> int:
-        return self._page
-
-    @page.setter
-    def page(self, value: int):
-        self._page = value
-
-    @property
-    def area_id(self) -> int:
-        """Area ID denotes what area in Austria. 900 is Wien."""
-        return 900
+        ...
 
     @property
     def rows(self) -> int:
-        return self._rows
+        ...
+
+    @property
+    def page(self) -> int:
+        ...
+
+    @page.setter
+    def page(self, value: int):
+        ...
+
+    @property
+    def area_id(self) -> int:
+        ...
+
+
+def get_data(obj: WillhabenRequest) -> list[dict[str, Any]]:
+    data: list[dict[str, Any]] = []
+    sum = 0
+    while True:
+        sleep(0.5)
+        response = _perform_request(
+            url=obj.url, header=obj.header, params=obj.params
+        )
+        if not response.get("rowsReturned"):
+            break
+
+        print(f"Successfull request for page {obj.page}")
+        sum += len(response["advertSummaryList"]["advertSummary"])
+        print(f"Requested {sum} / {response['rowsFound']}")
+
+        obj.page += 1
+        data.extend(response["advertSummaryList"]["advertSummary"])
+    return data
+
+
+def _perform_request(
+    url: str, header: dict[str, str], params: dict[str, str | int]
+) -> dict[str, Any]:
+    try:
+        response = requests.get(url=url, headers=header, params=params)
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        raise NoConnectionError(f"HTTP Error: {e.response.status_code}") from e
+    except Exception as e:
+        raise NoConnectionError(e) from e
+    return response.json()

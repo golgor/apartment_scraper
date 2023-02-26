@@ -1,19 +1,23 @@
 import json
 from datetime import datetime
+from enum import Enum
 
 from apartment_scraper import Site, immowelt, pkg_path, willhaben
 from apartment_scraper.data_exporter import DataExporter
 from apartment_scraper.data_loader import DataLoader
 
 
-def get_willhaben_raw_data(filename: str):
-    wh = willhaben.WohnungenWien()
-    test = willhaben.get_data(wh)
+def get_willhaben_raw_data(area_id: Enum):
+    wh = willhaben.Wohnungen(area_id=area_id)
+    raw_data = willhaben.get_data(wh)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    filename = f"{wh.name}_{today}"
 
     filepath = pkg_path.joinpath("willhaben", "raw_data", f"{filename}.json")
     with open(filepath, "w") as f:
-        f.write(json.dumps(test, indent=2))
-        print(f"Successfully saved {len(test)}")
+        f.write(json.dumps(raw_data, indent=2))
+        print(f"Successfully saved {len(raw_data)}")
 
 
 def get_immowelt_raw_data(filename: str):
@@ -45,7 +49,20 @@ def parse_raw_data(filename: str, site: Site):
 
 
 if __name__ == "__main__":
-    today = datetime.now().strftime("%Y-%m-%d")
-    # filename = "2023-02-24_test"
-    # get_willhaben_raw_data(today)
-    parse_raw_data(today, site=Site.WILLHABEN)
+    areas = [
+        willhaben.AreaId.NIEDERÖSTERREICH.KORNEUBURG,
+        willhaben.AreaId.NIEDERÖSTERREICH.TULLN,
+        willhaben.AreaId.NIEDERÖSTERREICH.GÄNSERNDORF,
+        willhaben.AreaId.NIEDERÖSTERREICH.MISTELBACH,
+        willhaben.AreaId.NIEDERÖSTERREICH.MÖLDLING,
+        willhaben.AreaId.NIEDERÖSTERREICH.KREMS_AN_DER_DONAU,
+        willhaben.AreaId.NIEDERÖSTERREICH.KREMS_LAND,
+        willhaben.AreaId.NIEDERÖSTERREICH.SANKT_PÖLTEN,
+        willhaben.AreaId.NIEDERÖSTERREICH.SANKT_PÖLTEN_LAND,
+        willhaben.AreaId.NIEDERÖSTERREICH.BADEN,
+        willhaben.AreaId.NIEDERÖSTERREICH.WIENER_NEUSTADT,
+        willhaben.AreaId.NIEDERÖSTERREICH.HOLLABRUNN,
+    ]
+    for area in areas:
+        get_willhaben_raw_data(area_id=area)
+    # parse_raw_data(today, site=Site.WILLHABEN)
