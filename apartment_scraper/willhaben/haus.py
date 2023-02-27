@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Any
 
 
-class Wohnungen:
+class Haus:
     def __init__(self, area_id: Enum, rows: int = 200, page: int = 1):
         self._rows = rows
         self._page = page
@@ -12,7 +12,7 @@ class Wohnungen:
     def url(self) -> str:
         return (
             "https://www.willhaben.at/webapi/iad/search/atz/seo/immobilien/"
-            "eigentumswohnung/eigentumswohnung-angebote"
+            "haus-kaufen/haus-angebote"
         )
 
     @property
@@ -49,4 +49,4 @@ class Wohnungen:
     def name(self) -> str:
         string = str(self._area_id)[1:]
         area_string = string.replace(".", "_").lower()
-        return f"wohnungen_{area_string}"
+        return f"haus_{area_string}"

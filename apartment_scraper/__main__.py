@@ -8,7 +8,7 @@ from apartment_scraper.data_loader import DataLoader
 
 
 def get_willhaben_raw_data(area_id: Enum):
-    wh = willhaben.Wohnungen(area_id=area_id)
+    wh = willhaben.Haus(area_id=area_id)
     raw_data = willhaben.get_data(wh)
 
     today = datetime.now().strftime("%Y-%m-%d")
