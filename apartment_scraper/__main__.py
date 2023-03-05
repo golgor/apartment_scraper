@@ -1,16 +1,16 @@
 import json
 from datetime import datetime
 
-from apartment_scraper import Apartment, Site, immowelt, pkg_path, willhaben
-from apartment_scraper.data_exporter import DataExporter
+from apartment_scraper import Site, immowelt, pkg_path, willhaben
 from apartment_scraper.data_loader import DataLoader
+from apartment_scraper.models import Apartment, Model
 
 
 def get_willhaben_raw_data(obj: willhaben.Wohnungen | willhaben.Haus):
     raw_data = willhaben.get_data(obj)
 
     today = datetime.now().strftime("%Y-%m-%d")
-    filename = f"{wh.name}_{today}"
+    filename = f"{obj.name}_{today}"
 
     filepath = pkg_path.joinpath("willhaben", "raw_data", f"{filename}.json")
     with open(filepath, "w") as f:
@@ -45,22 +45,22 @@ def parse_raw_data(filename: str, site: Site) -> list[Apartment]:
 
 
 if __name__ == "__main__":
-    de = DataExporter(site=Site.WILLHABEN)
-    # de.export_json(filename, apartments)
-    # de.export_csv(filename, apartments)
-    areas = [
-        willhaben.AreaId.WIEN.DONAUSTADT,
-    ]
+    model = Model(path=pkg_path.joinpath("test.db"))
+    # areas = [
+    #     willhaben.AreaId.WIEN.ALL,
+    # ]
 
-    for area in areas:
-        wh = willhaben.Wohnungen(area_id=area)
-        get_willhaben_raw_data(wh)
+    # for area in areas:
+    #     wh = willhaben.Wohnungen(area_id=area)
+    #     get_willhaben_raw_data(wh)
 
-    # raw_data_path = pkg_path.joinpath("willhaben", "raw_data")
-    # paths = raw_data_path.glob("wohnungen_wien*.json")
-    # apartments: list[Apartment] = []
-    # for path in paths:
-    #     parsed_path = str(path).split(".")[0]
-    #     apartments.extend(parse_raw_data(parsed_path, Site.WILLHABEN))
+    raw_data_path = pkg_path.joinpath("willhaben", "raw_data")
+    paths = raw_data_path.glob("wohnungen_wien_all*.json")
+    apartments: list[Apartment] = []
+    for path in paths:
+        parsed_path = str(path).split(".")[0]
+        apartments.extend(parse_raw_data(parsed_path, Site.WILLHABEN))
+
+    model.add_apartments(apartments)
     # print(len(apartments))
     # de.export_csv("Wohnungen", apartments)
