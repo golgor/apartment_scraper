@@ -1,15 +1,13 @@
 import json
 from datetime import datetime
-from enum import Enum
 
-from apartment_scraper import Site, immowelt, pkg_path, willhaben
+from apartment_scraper import Apartment, Site, immowelt, pkg_path, willhaben
 from apartment_scraper.data_exporter import DataExporter
 from apartment_scraper.data_loader import DataLoader
 
 
-def get_willhaben_raw_data(area_id: Enum):
-    wh = willhaben.Wohnungen(area_id=area_id)
-    raw_data = willhaben.get_data(wh)
+def get_willhaben_raw_data(obj: willhaben.Wohnungen | willhaben.Haus):
+    raw_data = willhaben.get_data(obj)
 
     today = datetime.now().strftime("%Y-%m-%d")
     filename = f"{wh.name}_{today}"
@@ -32,9 +30,9 @@ def get_immowelt_raw_data(filename: str):
         print(f"Successfully saved {len(test)}")
 
 
-def parse_raw_data(filename: str, site: Site):
+def parse_raw_data(filename: str, site: Site) -> list[Apartment]:
     dl = DataLoader(site=site)
-    de = DataExporter(site=site)
+
     raw_data = dl.load_raw_data(filename)
 
     if site == Site.IMMOWELT:
@@ -43,26 +41,26 @@ def parse_raw_data(filename: str, site: Site):
         apartments = willhaben.parse_willhaben_response(raw_data)
     else:
         raise ValueError("No valid site selected!")
-
-    de.export_json(filename, apartments)
-    de.export_csv(filename, apartments)
+    return apartments
 
 
 if __name__ == "__main__":
+    de = DataExporter(site=Site.WILLHABEN)
+    # de.export_json(filename, apartments)
+    # de.export_csv(filename, apartments)
     areas = [
-        willhaben.AreaId.NIEDERÖSTERREICH.KORNEUBURG,
-        willhaben.AreaId.NIEDERÖSTERREICH.TULLN,
-        willhaben.AreaId.NIEDERÖSTERREICH.GÄNSERNDORF,
-        willhaben.AreaId.NIEDERÖSTERREICH.MISTELBACH,
-        willhaben.AreaId.NIEDERÖSTERREICH.MÖLDLING,
-        willhaben.AreaId.NIEDERÖSTERREICH.KREMS_AN_DER_DONAU,
-        willhaben.AreaId.NIEDERÖSTERREICH.KREMS_LAND,
-        willhaben.AreaId.NIEDERÖSTERREICH.SANKT_PÖLTEN,
-        willhaben.AreaId.NIEDERÖSTERREICH.SANKT_PÖLTEN_LAND,
-        willhaben.AreaId.NIEDERÖSTERREICH.BADEN,
-        willhaben.AreaId.NIEDERÖSTERREICH.WIENER_NEUSTADT,
-        willhaben.AreaId.NIEDERÖSTERREICH.HOLLABRUNN,
+        willhaben.AreaId.WIEN.DONAUSTADT,
     ]
+
     for area in areas:
-        get_willhaben_raw_data(area_id=area)
-    # parse_raw_data(today, site=Site.WILLHABEN)
+        wh = willhaben.Wohnungen(area_id=area)
+        get_willhaben_raw_data(wh)
+
+    # raw_data_path = pkg_path.joinpath("willhaben", "raw_data")
+    # paths = raw_data_path.glob("wohnungen_wien*.json")
+    # apartments: list[Apartment] = []
+    # for path in paths:
+    #     parsed_path = str(path).split(".")[0]
+    #     apartments.extend(parse_raw_data(parsed_path, Site.WILLHABEN))
+    # print(len(apartments))
+    # de.export_csv("Wohnungen", apartments)

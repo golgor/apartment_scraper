@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any
 
-from apartment_scraper import Apartment, PostCodeWien
+from apartment_scraper import Apartment
 
 
 class ProductId(Enum):
@@ -69,8 +69,8 @@ class FieldParser:
         return ProductId(self.response.get("productId", 0))
 
     @property
-    def postcode(self) -> PostCodeWien:
-        return PostCodeWien(self.get_attr(name="POSTCODE", fallback="0"))
+    def postcode(self) -> str:
+        return self.get_attr(name="POSTCODE", fallback="0")
 
     @property
     def rooms(self) -> int:
