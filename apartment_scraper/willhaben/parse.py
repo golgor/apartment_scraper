@@ -1,7 +1,8 @@
 from enum import Enum
 from typing import Any
 
-from apartment_scraper import Apartment
+# from apartment_scraper import Apartment
+from apartment_scraper.models import Apartment
 
 
 class ProductId(Enum):
@@ -53,10 +54,7 @@ class FieldParser:
     @property
     def url(self) -> str:
         try:
-            if url := self.get_attr("SEO_URL", ""):
-                return f"https://www.willhaben.at/iad/{url}"
-            else:
-                raise ValueError
+            return self.get_attr("SEO_URL", "")
         except Exception:
             print(
                 "Failed to parse the field 'SEO_URL' for "
@@ -95,6 +93,28 @@ class FieldParser:
     def id(self) -> str:
         return self.response["id"]
 
+    @property
+    def price_per_area(self) -> float:
+        try:
+            return self.price / self.area
+        except Exception:
+            print(
+                "Failed to calculate price_per_area' for "
+                f"id={self.response['id']}"
+            )
+            return 0
+
+    @property
+    def image_urls(self) -> list[str]:
+        try:
+            return self.get_attr("ALL_IMAGE_URLS", "")
+        except Exception:
+            print(
+                "Failed to parse ALL_IMAGE_URLS' for "
+                f"id={self.response['id']}"
+            )
+            return [""]
+
 
 def parse_willhaben_response(
     responses: list[dict[str, Any]]
@@ -105,13 +125,16 @@ def parse_willhaben_response(
         if parser.active:
             apartment_list.append(
                 Apartment(
-                    id=parser.id,
+                    apartment_id=parser.id,
                     price=parser.price,
                     area=parser.area,
                     url=parser.url,
                     post_code=parser.postcode,
                     rooms=parser.rooms,
                     floor=parser.floor,
+                    price_per_area=parser.price_per_area,
+                    image_urls=parser.image_urls,
+                    site="willhaben",
                 )
             )
     return apartment_list
