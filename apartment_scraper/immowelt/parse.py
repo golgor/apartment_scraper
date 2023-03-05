@@ -1,7 +1,5 @@
 from typing import Any
 
-from apartment_scraper import Apartment, PostCodeWien
-
 
 class FieldParser:
     def __init__(self, response: dict[str, Any]):
@@ -40,18 +38,8 @@ class FieldParser:
         return f"https://www.immowelt.at/expose/{self.response['onlineId']}"
 
     @property
-    def postcode(self) -> PostCodeWien:
-        try:
-            if place := self.response["place"]:
-                return PostCodeWien(place["postcode"])
-            raise ValueError
-        except Exception:
-            print(
-                "Failed to parse the field 'postcode' for "
-                f"id={self.response['id']}, "
-                f"url={self.url}"
-            )
-            return PostCodeWien("0")
+    def postcode(self) -> str:
+        return self.response.get("place", "")
 
     @property
     def rooms(self) -> int:
@@ -63,23 +51,24 @@ class FieldParser:
 
 
 def parse_immowelt_response(raw_data: list[dict[str, Any]]):
-    estates: list[dict[str, Any]] = list(
-        filter(lambda x: x["itemType"] == "ESTATE", raw_data)
-    )
-    apartment_list: list[Apartment] = []
+    raise NotImplementedError
+    # estates: list[dict[str, Any]] = list(
+    #     filter(lambda x: x["itemType"] == "ESTATE", raw_data)
+    # )
+    # apartment_list: list[Apartment] = []
 
-    for estate in estates:
-        # try:
-        parser = FieldParser(estate)
-        apartment_list.append(
-            Apartment(
-                id=parser.id,
-                price=parser.price,
-                area=parser.area,
-                url=parser.url,
-                post_code=parser.postcode,
-                rooms=parser.rooms,
-                floor=0,
-            )
-        )
-    return apartment_list
+    # for estate in estates:
+    #     # try:
+    #     parser = FieldParser(estate)
+    #     apartment_list.append(
+    #         Apartment(
+    #             id=parser.id,
+    #             price=parser.price,
+    #             area=parser.area,
+    #             url=parser.url,
+    #             post_code=parser.postcode,
+    #             rooms=parser.rooms,
+    #             floor=0,
+    #         )
+    #     )
+    # return apartment_list
