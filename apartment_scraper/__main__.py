@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from enum import Enum
 
-from apartment_scraper import Site, immowelt, pkg_path, willhaben
+from apartment_scraper import Apartment, Site, immowelt, pkg_path, willhaben
 from apartment_scraper.data_exporter import DataExporter
 from apartment_scraper.data_loader import DataLoader
 
@@ -32,9 +32,9 @@ def get_immowelt_raw_data(filename: str):
         print(f"Successfully saved {len(test)}")
 
 
-def parse_raw_data(filename: str, site: Site):
+def parse_raw_data(filename: str, site: Site) -> list[Apartment]:
     dl = DataLoader(site=site)
-    de = DataExporter(site=site)
+
     raw_data = dl.load_raw_data(filename)
 
     if site == Site.IMMOWELT:
@@ -43,9 +43,7 @@ def parse_raw_data(filename: str, site: Site):
         apartments = willhaben.parse_willhaben_response(raw_data)
     else:
         raise ValueError("No valid site selected!")
-
-    de.export_json(filename, apartments)
-    de.export_csv(filename, apartments)
+    return apartments
 
 
 if __name__ == "__main__":
