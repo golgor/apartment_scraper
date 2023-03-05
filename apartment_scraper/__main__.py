@@ -1,15 +1,13 @@
 import json
 from datetime import datetime
-from enum import Enum
 
 from apartment_scraper import Apartment, Site, immowelt, pkg_path, willhaben
 from apartment_scraper.data_exporter import DataExporter
 from apartment_scraper.data_loader import DataLoader
 
 
-def get_willhaben_raw_data(area_id: Enum):
-    wh = willhaben.Haus(area_id=area_id)
-    raw_data = willhaben.get_data(wh)
+def get_willhaben_raw_data(obj: willhaben.Wohnungen | willhaben.Haus):
+    raw_data = willhaben.get_data(obj)
 
     today = datetime.now().strftime("%Y-%m-%d")
     filename = f"{wh.name}_{today}"
