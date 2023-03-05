@@ -45,20 +45,22 @@ def parse_raw_data(filename: str, site: Site) -> list[Apartment]:
 
 
 if __name__ == "__main__":
+    de = DataExporter(site=Site.WILLHABEN)
+    # de.export_json(filename, apartments)
+    # de.export_csv(filename, apartments)
     areas = [
-        willhaben.AreaId.NIEDERÖSTERREICH.KORNEUBURG,
-        willhaben.AreaId.NIEDERÖSTERREICH.TULLN,
-        willhaben.AreaId.NIEDERÖSTERREICH.GÄNSERNDORF,
-        willhaben.AreaId.NIEDERÖSTERREICH.MISTELBACH,
-        willhaben.AreaId.NIEDERÖSTERREICH.MÖLDLING,
-        willhaben.AreaId.NIEDERÖSTERREICH.KREMS_AN_DER_DONAU,
-        willhaben.AreaId.NIEDERÖSTERREICH.KREMS_LAND,
-        willhaben.AreaId.NIEDERÖSTERREICH.SANKT_PÖLTEN,
-        willhaben.AreaId.NIEDERÖSTERREICH.SANKT_PÖLTEN_LAND,
-        willhaben.AreaId.NIEDERÖSTERREICH.BADEN,
-        willhaben.AreaId.NIEDERÖSTERREICH.WIENER_NEUSTADT,
-        willhaben.AreaId.NIEDERÖSTERREICH.HOLLABRUNN,
+        willhaben.AreaId.WIEN.DONAUSTADT,
     ]
+
     for area in areas:
-        get_willhaben_raw_data(area_id=area)
-    # parse_raw_data(today, site=Site.WILLHABEN)
+        wh = willhaben.Wohnungen(area_id=area)
+        get_willhaben_raw_data(wh)
+
+    # raw_data_path = pkg_path.joinpath("willhaben", "raw_data")
+    # paths = raw_data_path.glob("wohnungen_wien*.json")
+    # apartments: list[Apartment] = []
+    # for path in paths:
+    #     parsed_path = str(path).split(".")[0]
+    #     apartments.extend(parse_raw_data(parsed_path, Site.WILLHABEN))
+    # print(len(apartments))
+    # de.export_csv("Wohnungen", apartments)
