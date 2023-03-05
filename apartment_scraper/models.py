@@ -93,22 +93,6 @@ def add_willhaben_siteinfo(model: Model):
     model.add_site(willhaben)
 
 
-def read_data(model: Model):
-    clean_data_path = pkg_path.joinpath(
-        "willhaben", "clean_data", f"{date}.json"
-    )
-
-    with open(clean_data_path, "r") as f:
-        data: dict[str, Any] = json.load(f)
-
-    test: list[Apartment] = [
-        Apartment(apartment_id=id, site="willhaben", **info)
-        for id, info in data.items()
-    ]
-
-    model.add_apartments(test)
-
-
 if __name__ == "__main__":
     model = Model(path=pkg_path.joinpath("test.db"))
     date = datetime.date(2023, 2, 17)
