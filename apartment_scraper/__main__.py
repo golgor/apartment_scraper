@@ -6,5 +6,7 @@ if __name__ == "__main__":
     area = willhaben.AreaId.WIEN.ALL
     wh = willhaben.Wohnungen(area_id=area)
     raw_data = willhaben.get_data(wh)
-    apartments = willhaben.parse_willhaben_response(raw_data)
+    apartments = willhaben.parse_willhaben_response(
+        elements=raw_data, type="kaufen"
+    )
     model.add_apartments(apartments)

@@ -1,13 +1,11 @@
 import datetime
-import json
 import pathlib
-from typing import Any, Optional
+from typing import Optional
 
 from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
-    String,
     create_engine,
     func,
     select,
@@ -34,6 +32,7 @@ class Apartment(Base):
     price_per_area: Mapped[float]
     image_urls: Mapped[Optional[str]]
     site: Mapped[str] = mapped_column(ForeignKey("site_info.site"))
+    type: Mapped[str]
     created = Column(DateTime(timezone=True), server_default=func.now())
     updated = Column(DateTime(timezone=True), onupdate=func.now())
 

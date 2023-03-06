@@ -1,7 +1,5 @@
 import pathlib
-from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Iterable
 
 __version__ = "0.0.1b"
 

@@ -117,11 +117,12 @@ class FieldParser:
 
 
 def parse_willhaben_response(
-    responses: list[dict[str, Any]]
+    elements: list[dict[str, Any]],
+    type: str,
 ) -> list[Apartment]:
     apartment_list: list[Apartment] = []
-    for response in responses:
-        parser = FieldParser(response=response)
+    for element in elements:
+        parser = FieldParser(response=element)
         if parser.active:
             apartment_list.append(
                 Apartment(
@@ -135,6 +136,7 @@ def parse_willhaben_response(
                     price_per_area=parser.price_per_area,
                     image_urls=parser.image_urls,
                     site="willhaben",
+                    type=type,
                 )
             )
     return apartment_list
