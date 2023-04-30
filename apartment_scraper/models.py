@@ -1,3 +1,4 @@
+import csv
 import datetime
 import pathlib
 from typing import Optional
@@ -19,8 +20,8 @@ class Base(DeclarativeBase):
     pass
 
 
-class Apartment(Base):
-    __tablename__ = "apartments"
+class ApartmentBuy(Base):
+    __tablename__ = "apartments_buy"
     id: Mapped[int] = mapped_column(primary_key=True)
     apartment_id: Mapped[int]
     area: Mapped[int]
@@ -28,13 +29,37 @@ class Apartment(Base):
     url: Mapped[str]
     rooms: Mapped[float]
     floor: Mapped[int]
+    address: Mapped[str]
     post_code: Mapped[str]
     price_per_area: Mapped[float]
     image_urls: Mapped[Optional[str]]
     site: Mapped[str] = mapped_column(ForeignKey("site_info.site"))
-    type: Mapped[str]
     created = Column(DateTime(timezone=True), server_default=func.now())
     updated = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class ApartmentRent(Base):
+    __tablename__ = "apartments_rent"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    apartment_id: Mapped[int]
+    area: Mapped[int]
+    rent: Mapped[int]
+    url: Mapped[str]
+    rooms: Mapped[float]
+    floor: Mapped[int]
+    address: Mapped[str]
+    post_code: Mapped[str]
+    rent_per_area: Mapped[float]
+    image_urls: Mapped[Optional[str]]
+    site: Mapped[str] = mapped_column(ForeignKey("site_info.site"))
+    coordinates: Mapped[Optional[str]]
+    free_area_type: Mapped[Optional[str]]
+    free_area: Mapped[Optional[int]]
+    created = Column(DateTime(timezone=True), server_default=func.now())
+    updated = Column(DateTime(timezone=True), onupdate=func.now())
+
+    def __repr__(self) -> str:
+        return f"ApartmentsRent(id={self.id}, apartment_id={self.apartment_id}, area={self.area}, rent={self.rent}, url={self.url}, rooms={self.rooms}, floor={self.floor}, post_code={self.post_code}, rent_per_area={self.rent_per_area}, image_urls={self.image_urls}, site={self.site}, created={self.created}, updated={self.updated})"
 
 
 class SiteInfo(Base):
@@ -45,34 +70,36 @@ class SiteInfo(Base):
 
 
 class Model:
-    def __init__(self, path: pathlib.Path):
+    def __init__(self, path: pathlib.Path) -> None:
         self.engine = create_engine(f"sqlite:///{str(path)}", echo=False)
         if not path.exists():
             print("Creating database!")
             Base.metadata.create_all(self.engine)
 
-    def add_apartment(self, apartment: Apartment):
+    def add_apartment(self, apartment: ApartmentBuy) -> None:
         with Session(self.engine) as session:
             session.add(apartment)
             session.commit()
 
-    def add_apartments(self, apartments: list[Apartment]):
+    def add_apartments(
+        self, apartments: list[ApartmentBuy] | list[ApartmentRent]
+    ) -> None:
         with Session(self.engine) as session:
             session.add_all(apartments)
             session.commit()
 
-    def add_site(self, site: SiteInfo):
+    def add_site(self, site: SiteInfo) -> None:
         with Session(self.engine) as session:
             session.add(site)
             session.commit()
 
-    def get_apartments(self, date: Optional[datetime.date] = None):
+    def get_apartments(self, date: Optional[datetime.date] = None) -> None:
         if date:
-            stmt = select(Apartment).where(
-                func.DATE(Apartment.created) == str(date)
+            stmt = select(ApartmentBuy).where(
+                func.DATE(ApartmentBuy.created) == str(date)
             )
         else:
-            stmt = select(Apartment)
+            stmt = select(ApartmentBuy)
 
         with Session(self.engine) as session:
             for apartment in session.scalars(stmt):
@@ -80,10 +107,51 @@ class Model:
 
     def get_count(self) -> int:
         with Session(self.engine) as session:
-            return session.query(Apartment).count()
+            return session.query(ApartmentBuy).count()
+
+    def dump_to_csv(self, filename: str) -> None:
+        with Session(self.engine) as session:
+            with open("dump.csv", "w") as f:
+                out = csv.writer(f)
+                out.writerow(
+                    [
+                        "apartment_id",
+                        "area",
+                        "rent",
+                        "url",
+                        "rooms",
+                        "floor",
+                        "address",
+                        "post_code",
+                        "rent_per_area",
+                        "site",
+                        "coordinates",
+                        "free_area_type",
+                        "free_area",
+                    ]
+                )
+
+                for item in session.query(ApartmentRent).all():
+                    out.writerow(
+                        [
+                            item.apartment_id,
+                            item.area,
+                            item.rent,
+                            item.url,
+                            item.rooms,
+                            item.floor,
+                            item.address,
+                            item.post_code,
+                            item.rent_per_area,
+                            item.site,
+                            item.coordinates,
+                            item.free_area_type,
+                            item.free_area,
+                        ]
+                    )
 
 
-def add_willhaben_siteinfo(model: Model):
+def add_willhaben_siteinfo(model: Model) -> None:
     willhaben = SiteInfo(
         site="willhaben",
         url_base="https://www.willhaben.at/iad/",
