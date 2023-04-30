@@ -91,6 +91,12 @@ class Model:
         with Session(self.engine) as session:
             return list(session.scalars(stmt).all())
 
+    def get_freiwohnungen(self) -> list[ApartmentBuy]:
+        stmt = select(ApartmentBuy)
+
+        with Session(self.engine) as session:
+            return list(session.scalars(stmt).all())
+
     def get_count(self) -> int:
         with Session(self.engine) as session:
             return session.query(ApartmentBuy).count()
