@@ -109,7 +109,13 @@ class FieldParser:
     @property
     def image_urls(self) -> list[str]:
         try:
-            return self.get_attr("ALL_IMAGE_URLS", "")
+            if urls := self.get_attr("ALL_IMAGE_URLS", ""):
+                return [
+                    f"https://cache.willhaben.at/mmo/{url}"
+                    for url in urls.split(";")
+                ]
+            else:
+                return urls or []
         except Exception:
             print(
                 "Failed to parse ALL_IMAGE_URLS' for "
@@ -202,7 +208,6 @@ def parse_willhaben_buy_response(
                     floor=parser.floor,
                     price_per_area=parser.price_per_area,
                     image_urls=parser.image_urls,
-                    site="willhaben",
                 )
             )
     return apartment_list
@@ -230,7 +235,6 @@ def parse_willhaben_rent_response(
                     coordinates=parser.coordinates,
                     free_area_type=parser.free_area_type,
                     free_area=parser.free_area,
-                    site="willhaben",
                 )
             )
     return apartment_list

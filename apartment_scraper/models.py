@@ -1,80 +1,77 @@
 import csv
-import datetime
 import pathlib
-from typing import Optional
+from typing import Generator, Optional
 
-from sqlalchemy import (
-    Column,
-    DateTime,
-    ForeignKey,
-    create_engine,
-    func,
-    select,
+from sqlalchemy import Column, DateTime, create_engine, func, select
+from sqlalchemy.dialects.sqlite import JSON
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    Session,
+    mapped_column,
+    sessionmaker,
 )
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
-
-from apartment_scraper import pkg_path
 
 
 class Base(DeclarativeBase):
     pass
 
 
-class ApartmentBuy(Base):
-    __tablename__ = "apartments_buy"
+class Apartment(Base):
+    __tablename__ = "apartments"
     id: Mapped[int] = mapped_column(primary_key=True)
     apartment_id: Mapped[int]
     area: Mapped[int]
-    price: Mapped[int]
     url: Mapped[str]
     rooms: Mapped[float]
     floor: Mapped[int]
     address: Mapped[str]
     post_code: Mapped[str]
-    price_per_area: Mapped[float]
-    image_urls: Mapped[Optional[str]]
-    site: Mapped[str] = mapped_column(ForeignKey("site_info.site"))
-    created = Column(DateTime(timezone=True), server_default=func.now())
-    updated = Column(DateTime(timezone=True), onupdate=func.now())
-
-
-class ApartmentRent(Base):
-    __tablename__ = "apartments_rent"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    apartment_id: Mapped[int]
-    area: Mapped[int]
-    rent: Mapped[int]
-    url: Mapped[str]
-    rooms: Mapped[float]
-    floor: Mapped[int]
-    address: Mapped[str]
-    post_code: Mapped[str]
-    rent_per_area: Mapped[float]
-    image_urls: Mapped[Optional[str]]
-    site: Mapped[str] = mapped_column(ForeignKey("site_info.site"))
     coordinates: Mapped[Optional[str]]
     free_area_type: Mapped[Optional[str]]
     free_area: Mapped[Optional[int]]
+    image_urls = Column(JSON, nullable=True)
+    apartment_type: Mapped[str]
     created = Column(DateTime(timezone=True), server_default=func.now())
     updated = Column(DateTime(timezone=True), onupdate=func.now())
+    __mapper_args__ = {"polymorphic_on": "apartment_type"}
+
+
+class ApartmentBuy(Apartment):
+    __mapper_args__ = {"polymorphic_identity": "purchase"}
+    price: Mapped[Optional[int]]
+    price_per_area: Mapped[Optional[float]]
+
+
+class ApartmentRent(Apartment):
+    __mapper_args__ = {"polymorphic_identity": "rental"}
+    rent: Mapped[Optional[int]]
+    rent_per_area: Mapped[Optional[float]]
 
     def __repr__(self) -> str:
         return f"ApartmentsRent(id={self.id}, apartment_id={self.apartment_id}, area={self.area}, rent={self.rent}, url={self.url}, rooms={self.rooms}, floor={self.floor}, post_code={self.post_code}, rent_per_area={self.rent_per_area}, image_urls={self.image_urls}, site={self.site}, created={self.created}, updated={self.updated})"
 
 
-class SiteInfo(Base):
-    __tablename__ = "site_info"
-    site: Mapped[str] = mapped_column(primary_key=True)
-    url_base: Mapped[str]
-    image_base: Mapped[str]
-
-
 class Model:
     def __init__(self, path: pathlib.Path) -> None:
-        self.engine = create_engine(f"sqlite:///{str(path)}", echo=False)
+        self.engine = create_engine(
+            f"sqlite:///{str(path)}",
+            echo=False,
+            connect_args={"check_same_thread": False},
+        )
         if not path.exists():
             print("Creating database!")
             Base.metadata.create_all(self.engine)
+
+    def get_db_session(self) -> Generator[Session, None, None]:
+        db = sessionmaker(
+            autocommit=False, autoflush=False, bind=self.engine
+        )()
+        try:
+            yield db
+        finally:
+            db.close()
+        return
 
     def add_apartment(self, apartment: ApartmentBuy) -> None:
         with Session(self.engine) as session:
@@ -88,22 +85,11 @@ class Model:
             session.add_all(apartments)
             session.commit()
 
-    def add_site(self, site: SiteInfo) -> None:
-        with Session(self.engine) as session:
-            session.add(site)
-            session.commit()
-
-    def get_apartments(self, date: Optional[datetime.date] = None) -> None:
-        if date:
-            stmt = select(ApartmentBuy).where(
-                func.DATE(ApartmentBuy.created) == str(date)
-            )
-        else:
-            stmt = select(ApartmentBuy)
+    def get_rentals(self) -> list[ApartmentRent]:
+        stmt = select(ApartmentRent)
 
         with Session(self.engine) as session:
-            for apartment in session.scalars(stmt):
-                print(apartment.apartment_id)
+            return list(session.scalars(stmt).all())
 
     def get_count(self) -> int:
         with Session(self.engine) as session:
@@ -124,7 +110,6 @@ class Model:
                         "address",
                         "post_code",
                         "rent_per_area",
-                        "site",
                         "coordinates",
                         "free_area_type",
                         "free_area",
@@ -143,25 +128,8 @@ class Model:
                             item.address,
                             item.post_code,
                             item.rent_per_area,
-                            item.site,
                             item.coordinates,
                             item.free_area_type,
                             item.free_area,
                         ]
                     )
-
-
-def add_willhaben_siteinfo(model: Model) -> None:
-    willhaben = SiteInfo(
-        site="willhaben",
-        url_base="https://www.willhaben.at/iad/",
-        image_base="https://cache.willhaben.at/mmo/",
-    )
-    model.add_site(willhaben)
-
-
-if __name__ == "__main__":
-    model = Model(path=pkg_path.joinpath("test.db"))
-    date = datetime.date(2023, 2, 17)
-    # add_willhaben_siteinfo(model)
-    add_willhaben_siteinfo(model)
