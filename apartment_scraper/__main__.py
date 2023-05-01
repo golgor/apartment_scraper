@@ -6,6 +6,6 @@ if __name__ == "__main__":
     area = willhaben.AreaId.WIEN.LIESING
     wh = willhaben.MietWohnungen(area_id=area)
     raw_data = willhaben.get_data(wh)
-    apartments = willhaben.parse_willhaben_rent_response(elements=raw_data)
+    apartments = willhaben.parse_willhaben_response(elements=raw_data)
     model.add_apartments(apartments)
-    model.dump_to_csv(filename="dump.csv")
+    # model.dump_to_csv(filename="dump.csv")

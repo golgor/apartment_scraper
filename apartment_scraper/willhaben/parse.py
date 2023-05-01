@@ -2,12 +2,13 @@ from enum import Enum
 from typing import Any
 
 # from apartment_scraper import Apartment
-from apartment_scraper.models import ApartmentBuy, ApartmentRent
+from apartment_scraper.models import Apartment
 
 
 class ProductId(Enum):
     UNDEFINED = 0
-    PRIVATE = 200
+    PRIVATE_BUY = 100
+    PRIVATE_RENTAL = 200
     RENTAL = 227
     PROJECT = 270
     EIGENTUMSWOHNUNG = 223
@@ -108,7 +109,9 @@ def parse_floor_attribute(response: dict[str, Any]) -> float:
 
 def parse_rent_attribute(response: dict[str, Any]) -> float:
     try:
-        rent: str = get_attribute_with_name(response, "RENT", 0)[0]
+        rent: str = get_attribute_with_name(
+            response, "RENT/PER_MONTH_LETTINGS", 0
+        )[0]
         return round(float(rent), 2)
     except Exception:
         print("Failed to parse the field 'RENT' for " f"id={response['id']}")
@@ -126,17 +129,17 @@ def parse_address_attribute(response: dict[str, Any]) -> str:
         return ""
 
 
-def parse_free_area_attribute(response: dict[str, Any]) -> list[str]:
+def parse_free_area_attribute(response: dict[str, Any]) -> int:
     try:
         free_area: list[str] = get_attribute_with_name(
-            response, "FREE_AREA", 0
+            response, "FREE_AREA/FREE_AREA_AREA_TOTAL", 0
         )
-        return free_area
+        return int(free_area[0])
     except Exception:
         print(
             "Failed to parse the field 'FREE_AREA' for " f"id={response['id']}"
         )
-        return []
+        return 0
 
 
 def parse_free_area_type_name_attribute(response: dict[str, Any]) -> list[str]:
@@ -198,6 +201,8 @@ def parse_product_id_attribute(response: dict[str, Any]) -> str:
         ]
         return ProductId(int(product_id)).name.lower()
     except Exception:
+        if product_id:
+            return product_id
         print(
             "Failed to parse the field 'PRODUCT_ID' for "
             f"id={response['id']}"
@@ -245,49 +250,51 @@ class FieldParser:
         return ProductId(self.response.get("productId", 0))
 
 
-def parse_willhaben_buy_response(
+# def parse_willhaben_buy_response(
+#     elements: list[dict[str, Any]]
+# ) -> list[ApartmentBuy]:
+#     apartment_list: list[ApartmentBuy] = [
+#         ApartmentBuy(
+#             apartment_id=parse_id_attribute(element),
+#             product_id=parse_product_id_attribute(element),
+#             price=parse_price_attribute(element),
+#             area=parse_area_attribute(element),
+#             url=parse_url_attribute(element),
+#             post_code=parse_post_code_attribute(element),
+#             rooms=parse_room_attribute(element),
+#             floor=parse_floor_attribute(element),
+#             price_per_area=calc_price_per_area(element),
+#             advertiser=parser_advertiser_attribute(element),
+#             status=parse_status_attribute(element),
+#             address=parse_address_attribute(element),
+#             image_urls=parse_image_urls_attribute(element),
+#             coordinates=parse_coordinates_attribute(element),
+#             free_area_type=parse_free_area_type_name_attribute(element),
+#             free_area=parse_free_area_attribute(element),
+#         )
+#         for element in elements
+#     ]
+#     return apartment_list
+
+
+def parse_willhaben_response(
     elements: list[dict[str, Any]]
-) -> list[ApartmentBuy]:
-    apartment_list: list[ApartmentBuy] = [
-        ApartmentBuy(
+) -> list[Apartment]:
+    apartment_list: list[Apartment] = [
+        Apartment(
             apartment_id=parse_id_attribute(element),
             product_id=parse_product_id_attribute(element),
+            status=parse_status_attribute(element),
+            # rent=parse_rent_attribute(element),
+            # rent_per_area=calc_rent_per_area(element),
             price=parse_price_attribute(element),
-            area=parse_area_attribute(element),
-            url=parse_url_attribute(element),
-            post_code=parse_post_code_attribute(element),
-            rooms=parse_room_attribute(element),
-            floor=parse_floor_attribute(element),
             price_per_area=calc_price_per_area(element),
-            advertiser=parser_advertiser_attribute(element),
-            status=parse_status_attribute(element),
-            address=parse_address_attribute(element),
-            image_urls=parse_image_urls_attribute(element),
-            coordinates=parse_coordinates_attribute(element),
-            free_area_type=parse_free_area_type_name_attribute(element),
-            free_area=parse_free_area_attribute(element),
-        )
-        for element in elements
-    ]
-    return apartment_list
-
-
-def parse_willhaben_rent_response(
-    elements: list[dict[str, Any]]
-) -> list[ApartmentRent]:
-    apartment_list: list[ApartmentRent] = [
-        ApartmentRent(
-            apartment_id=parse_id_attribute(element),
-            product_id=parse_product_id_attribute(element),
-            status=parse_status_attribute(element),
-            rent=parse_rent_attribute(element),
             area=parse_area_attribute(element),
             url=parse_url_attribute(element),
             post_code=parse_post_code_attribute(element),
             rooms=parse_room_attribute(element),
             floor=parse_floor_attribute(element),
             address=parse_address_attribute(element),
-            rent_per_area=calc_rent_per_area(element),
             image_urls=parse_image_urls_attribute(element),
             coordinates=parse_coordinates_attribute(element),
             free_area_type=parse_free_area_type_name_attribute(element),

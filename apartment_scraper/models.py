@@ -44,29 +44,33 @@ class Apartment(Base):
     address: Mapped[str]
     post_code: Mapped[str]
     coordinates: Mapped[Optional[str]]
+    price: Mapped[Optional[int]]
+    price_per_area: Mapped[Optional[float]]
+    # rent: Mapped[Optional[int]]
+    # rent_per_area: Mapped[Optional[float]]
     free_area_type = Column(JSON, nullable=True)
     free_area = Column(JSON, nullable=True)
     image_urls = Column(JSON, nullable=True)
-    apartment_type: Mapped[str]
+    # apartment_type: Mapped[str]
     advertiser: Mapped[str]
     created = Column(DateTime(timezone=True), server_default=func.now())
     updated = Column(DateTime(timezone=True), onupdate=func.now())
-    __mapper_args__ = {"polymorphic_on": "apartment_type"}
+    # __mapper_args__ = {"polymorphic_on": "apartment_type"}
 
 
-class ApartmentBuy(Apartment):
-    __mapper_args__ = {"polymorphic_identity": "purchase"}
-    price: Mapped[Optional[int]]
-    price_per_area: Mapped[Optional[float]]
+# class ApartmentBuy(Apartment):
+#     # __mapper_args__ = {"polymorphic_identity": "purchase"}
+#     price: Mapped[Optional[int]]
+#     price_per_area: Mapped[Optional[float]]
 
 
-class ApartmentRent(Apartment):
-    __mapper_args__ = {"polymorphic_identity": "rental"}
-    rent: Mapped[Optional[int]]
-    rent_per_area: Mapped[Optional[float]]
+# class ApartmentRent(Apartment):
+#     # __mapper_args__ = {"polymorphic_identity": "rental"}
+#     rent: Mapped[Optional[int]]
+#     rent_per_area: Mapped[Optional[float]]
 
-    def __repr__(self) -> str:
-        return f"ApartmentsRent(id={self.id}, apartment_id={self.apartment_id}, area={self.area}, rent={self.rent}, url={self.url}, rooms={self.rooms}, floor={self.floor}, post_code={self.post_code}, rent_per_area={self.rent_per_area}, image_urls={self.image_urls}, created={self.created}, updated={self.updated})"
+#     def __repr__(self) -> str:
+#         return f"ApartmentsRent(id={self.id}, apartment_id={self.apartment_id}, area={self.area}, rent={self.rent}, url={self.url}, rooms={self.rooms}, floor={self.floor}, post_code={self.post_code}, rent_per_area={self.rent_per_area}, image_urls={self.image_urls}, created={self.created}, updated={self.updated})"
 
 
 class Model:
@@ -90,22 +94,20 @@ class Model:
             db.close()
         return
 
-    def add_apartment(self, apartment: ApartmentBuy) -> None:
+    def add_apartment(self, apartment: Apartment) -> None:
         with Session(self.engine) as session:
             session.add(apartment)
             session.commit()
 
-    def add_apartments(
-        self, apartments: list[ApartmentBuy] | list[ApartmentRent]
-    ) -> None:
+    def add_apartments(self, apartments: list[Apartment]) -> None:
         with Session(self.engine) as session:
             session.add_all(apartments)
             session.commit()
 
     def get_rentals(self, page: int, pagesize: int) -> TransactionResult:
         stmt = (
-            select(ApartmentRent)
-            .where(ApartmentRent.id > page * pagesize)
+            select(Apartment)
+            .where(Apartment.id > page * pagesize)
             .limit(pagesize)
         )
 
@@ -116,15 +118,15 @@ class Model:
             results = list(session.scalars(stmt))
         return TransactionResult(results, len(results), total_count or 0)
 
-    def get_freiwohnungen(self) -> list[ApartmentBuy]:
-        stmt = select(ApartmentBuy)
+    def get_freiwohnungen(self) -> list[Apartment]:
+        stmt = select(Apartment)
 
         with Session(self.engine) as session:
             return list(session.scalars(stmt).all())
 
     def get_count(self) -> int:
         with Session(self.engine) as session:
-            return session.query(ApartmentBuy).count()
+            return session.query(Apartment).count()
 
     def dump_to_csv(self, filename: str) -> None:
         with Session(self.engine) as session:
@@ -147,7 +149,7 @@ class Model:
                     ]
                 )
 
-                for item in session.query(ApartmentRent).all():
+                for item in session.query(Apartment).all():
                     out.writerow(
                         [
                             item.apartment_id,
