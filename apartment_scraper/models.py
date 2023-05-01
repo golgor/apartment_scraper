@@ -35,6 +35,8 @@ class Apartment(Base):
     __tablename__ = "apartments"
     id: Mapped[int] = mapped_column(primary_key=True)
     apartment_id: Mapped[int]
+    status: Mapped[bool]
+    product_id: Mapped[int]
     area: Mapped[int]
     url: Mapped[str]
     rooms: Mapped[float]
@@ -42,10 +44,11 @@ class Apartment(Base):
     address: Mapped[str]
     post_code: Mapped[str]
     coordinates: Mapped[Optional[str]]
-    free_area_type: Mapped[Optional[str]]
-    free_area: Mapped[Optional[int]]
+    free_area_type = Column(JSON, nullable=True)
+    free_area = Column(JSON, nullable=True)
     image_urls = Column(JSON, nullable=True)
     apartment_type: Mapped[str]
+    advertiser: Mapped[str]
     created = Column(DateTime(timezone=True), server_default=func.now())
     updated = Column(DateTime(timezone=True), onupdate=func.now())
     __mapper_args__ = {"polymorphic_on": "apartment_type"}
