@@ -1,8 +1,16 @@
 import csv
 import pathlib
-from typing import Generator, Optional
+from typing import Any, Generator, NamedTuple, Optional
 
-from sqlalchemy import Column, DateTime, create_engine, func, select
+from sqlalchemy import (
+    Column,
+    DateTime,
+    column,
+    create_engine,
+    func,
+    select,
+    table,
+)
 from sqlalchemy.dialects.sqlite import JSON
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -11,6 +19,12 @@ from sqlalchemy.orm import (
     mapped_column,
     sessionmaker,
 )
+
+
+class TransactionResult(NamedTuple):
+    data: Any
+    element_count: int
+    total_count: int
 
 
 class Base(DeclarativeBase):
@@ -49,7 +63,7 @@ class ApartmentRent(Apartment):
     rent_per_area: Mapped[Optional[float]]
 
     def __repr__(self) -> str:
-        return f"ApartmentsRent(id={self.id}, apartment_id={self.apartment_id}, area={self.area}, rent={self.rent}, url={self.url}, rooms={self.rooms}, floor={self.floor}, post_code={self.post_code}, rent_per_area={self.rent_per_area}, image_urls={self.image_urls}, site={self.site}, created={self.created}, updated={self.updated})"
+        return f"ApartmentsRent(id={self.id}, apartment_id={self.apartment_id}, area={self.area}, rent={self.rent}, url={self.url}, rooms={self.rooms}, floor={self.floor}, post_code={self.post_code}, rent_per_area={self.rent_per_area}, image_urls={self.image_urls}, created={self.created}, updated={self.updated})"
 
 
 class Model:
@@ -85,11 +99,19 @@ class Model:
             session.add_all(apartments)
             session.commit()
 
-    def get_rentals(self) -> list[ApartmentRent]:
-        stmt = select(ApartmentRent)
+    def get_rentals(self, page: int, pagesize: int) -> TransactionResult:
+        stmt = (
+            select(ApartmentRent)
+            .where(ApartmentRent.id > page * pagesize)
+            .limit(pagesize)
+        )
 
+        my_table = table("apartments", column("id"))
+        count = select(func.count()).select_from(my_table)
         with Session(self.engine) as session:
-            return list(session.scalars(stmt).all())
+            total_count = session.execute(count).scalar()
+            results = list(session.scalars(stmt))
+        return TransactionResult(results, len(results), total_count or 0)
 
     def get_freiwohnungen(self) -> list[ApartmentBuy]:
         stmt = select(ApartmentBuy)

@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 
 class ApartmentRentSchema(BaseModel):
+    id: int
     apartment_id: int
     area: int
     rent: int
