@@ -11,7 +11,8 @@ model = Model(path=pkg_path.joinpath("test.db"))
 
 
 @app.get(
-    "/rent", response_model=dict[str, int | list[schemas.ApartmentRentSchema]]
+    "/apartments",
+    response_model=dict[str, int | list[schemas.ApartmentSchema]],
 )
 def rent(
     pagesize: int = 100, page: int = 0
@@ -28,8 +29,3 @@ def rent(
         "total_elements": count,
         "data": data,
     }
-
-
-@app.get("/buy", response_model=list[schemas.ApartmentBuySchema])
-def buy() -> list[Apartment]:
-    return model.get_freiwohnungen()
