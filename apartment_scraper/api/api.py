@@ -1,5 +1,3 @@
-from typing import Any
-
 import schemas
 from fastapi import FastAPI, HTTPException
 
