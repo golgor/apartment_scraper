@@ -14,6 +14,7 @@ class ApartmentSchema(BaseModel):
     floor: int
     address: str
     post_code: str
+    location: str
     coordinates: Optional[str]
     free_area_type: Optional[list[str]]
     free_area: Optional[int]

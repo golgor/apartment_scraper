@@ -43,6 +43,7 @@ class Apartment(Base):
     floor: Mapped[int]
     address: Mapped[str]
     post_code: Mapped[str]
+    location: Mapped[str]
     coordinates: Mapped[Optional[str]]
     price: Mapped[Optional[int]]
     price_per_area: Mapped[Optional[float]]

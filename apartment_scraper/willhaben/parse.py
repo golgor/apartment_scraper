@@ -210,6 +210,17 @@ def parse_product_id_attribute(response: dict[str, Any]) -> str:
         return ""
 
 
+def parse_location_attribute(response: dict[str, Any]) -> str:
+    try:
+        location: str = get_attribute_with_name(response, "LOCATION", "")[0]
+        return location
+    except Exception:
+        print(
+            "Failed to parse the field 'LOCATION' for " f"id={response['id']}"
+        )
+        return ""
+
+
 def calc_rent_per_area(response: dict[str, Any]) -> float:
     try:
         rent = parse_rent_attribute(response)
@@ -292,6 +303,7 @@ def parse_willhaben_response(
             area=parse_area_attribute(element),
             url=parse_url_attribute(element),
             post_code=parse_post_code_attribute(element),
+            location=parse_location_attribute(element),
             rooms=parse_room_attribute(element),
             floor=parse_floor_attribute(element),
             address=parse_address_attribute(element),
