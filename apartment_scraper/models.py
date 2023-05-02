@@ -105,7 +105,9 @@ class Model:
             session.add_all(apartments)
             session.commit()
 
-    def get_rentals(self, page: int, pagesize: int) -> TransactionResult:
+    def get_paged_apartments(
+        self, page: int, pagesize: int
+    ) -> TransactionResult:
         stmt = (
             select(Apartment)
             .where(Apartment.id > page * pagesize)
@@ -118,6 +120,13 @@ class Model:
             total_count = session.execute(count).scalar()
             results = list(session.scalars(stmt))
         return TransactionResult(results, len(results), total_count or 0)
+
+    def get_apartment_by_id(self, apartment_id: int) -> Apartment | None:
+        stmt = select(Apartment).where(Apartment.apartment_id == apartment_id)
+
+        with Session(self.engine) as session:
+            apartment: Apartment | None = session.scalars(stmt).first()
+        return apartment
 
     def get_freiwohnungen(self) -> list[Apartment]:
         stmt = select(Apartment)

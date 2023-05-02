@@ -9,17 +9,19 @@ model = Model(path=pkg_path.joinpath("test.db"))
 
 
 @app.get(
-    "/apartments",
+    "/apartments/",
     response_model=dict[str, int | list[schemas.ApartmentSchema]],
 )
-def rent(
+def query_all_apartments(
     pagesize: int = 100, page: int = 0
 ) -> dict[str, int | list[Apartment]]:
     if pagesize > 500:
         raise HTTPException(
             status_code=413, detail="Pagesize cannot be greater than 500"
         )
-    data, elements, count = model.get_rentals(page=page, pagesize=pagesize)
+    data, elements, count = model.get_paged_apartments(
+        page=page, pagesize=pagesize
+    )
     return {
         "pagesize": pagesize,
         "page": page,
@@ -27,3 +29,16 @@ def rent(
         "total_elements": count,
         "data": data,
     }
+
+
+@app.get(
+    "/apartments/{apartment_id}",
+    response_model=schemas.ApartmentSchema,
+)
+def query_apartment_by_id(apartment_id: int) -> Apartment:
+    apartment = model.get_apartment_by_id(apartment_id)
+    if apartment is None:
+        raise HTTPException(
+            status_code=404, detail=f"Apartment {apartment_id} not found"
+        )
+    return apartment
