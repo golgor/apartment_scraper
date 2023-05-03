@@ -137,3 +137,4 @@ apps.xlsx
 *.json
 *.ods
 *.csv
+*.db

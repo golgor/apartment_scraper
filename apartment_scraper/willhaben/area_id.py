@@ -43,7 +43,7 @@ class _Niederösterreich(Enum):
     LILIENFELD = 314
     MELK = 315
     MISTELBACH = 316
-    MÖLDLING = 317
+    MÖDLING = 317
     NEUNKIRCHEN = 318
     SANKT_PÖLTEN = 302
     SANKT_PÖLTEN_LAND = 319

@@ -65,6 +65,7 @@ def _perform_request(
         response = requests.get(url=url, headers=header, params=params)
         response.raise_for_status()
     except requests.exceptions.HTTPError as e:
+        print(response.request.url)
         raise NoConnectionError(f"HTTP Error: {e.response.status_code}") from e
     except Exception as e:
         raise NoConnectionError(e) from e
