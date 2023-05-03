@@ -17,7 +17,11 @@ pip install -e .
 Customize __main__.py accordingly, execute it, and you will then find the database in the folder of the package, typically `apartment_scraper/apartment_scraper/test.db`.
 
 ### Use API
-To use the API, go into the folder `api`, and run:
+To use the API, build the image using docker. While in the main directory, execute:
 ```bash
-uvicorn api:app --reload
+> docker build -t apartment-api .
+```
+To start the image in a detached state, execute:
+```bash
+> docker run -d -p 8080:80 apartment-api:latest
 ```
