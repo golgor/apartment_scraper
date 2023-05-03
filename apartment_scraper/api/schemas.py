@@ -20,6 +20,7 @@ class ApartmentSchema(BaseModel):
     free_area: Optional[int]
     image_urls: Optional[list[str]]
     advertiser: str
+    prio: Optional[int]
     product_id: str
 
     class Config:
