@@ -4,3 +4,14 @@ This is a project used to get information about apartments available to rent or 
 ## Possible improvements
 - Currently it only stores data in the database. It would be nice with some kind of export to for example .csv or excel files.
 - Currently only supports Willhaben.at. Might be of interest to add other platforms as well.
+
+## How to use
+Checkout out the repo from Github:
+```bash
+git clone https://github.com/golgor/apartment_scraper.git
+```
+Then install it as editable install using pip:
+```
+pip install -e .
+```
+Customize __main__.py accordingly, execute it, and you will then find the database in the folder of the package, typically `apartment_scraper/apartment_scraper/test.db`.
