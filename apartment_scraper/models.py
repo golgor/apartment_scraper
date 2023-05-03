@@ -99,15 +99,22 @@ class Model:
         with Session(self.engine) as session:
             return session.query(Apartment).count()
 
-    def update_apartment_prio(self, apartment_id: int, prio: int) -> None:
+    def update_apartment_prio(
+        self, apartment_id: int, prio: int
+    ) -> Apartment | None:
         stmt = (
             update(Apartment)
             .where(Apartment.apartment_id == apartment_id)
             .values(prio=prio)
+            .returning(Apartment)
         )
+
         with Session(self.engine) as session:
-            session.execute(stmt)
+            result = session.execute(stmt).scalar_one_or_none()
+            if result:
+                session.expunge(result)
             session.commit()
+        return result
 
     def dump_to_csv(self, filename: str) -> None:
         with Session(self.engine) as session:
