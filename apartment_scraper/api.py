@@ -1,11 +1,15 @@
-import schemas
 from fastapi import FastAPI, HTTPException
 
-from apartment_scraper import pkg_path
+from apartment_scraper import pkg_path, schemas
 from apartment_scraper.models import Apartment, Model
 
 app = FastAPI()
 model = Model(path=pkg_path.joinpath("test.db"))
+
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
 
 
 @app.get(
