@@ -15,3 +15,9 @@ Then install it as editable install using pip:
 pip install -e .
 ```
 Customize __main__.py accordingly, execute it, and you will then find the database in the folder of the package, typically `apartment_scraper/apartment_scraper/test.db`.
+
+### Use API
+To use the API, go into the folder `api`, and run:
+```bash
+uvicorn api:app --reload
+```
