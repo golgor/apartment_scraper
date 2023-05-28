@@ -63,6 +63,9 @@ class Model:
             print("Creating database!")
             Base.metadata.create_all(self.engine)
 
+    def get_engine(self):
+        return self.engine
+
     def add_apartment(self, apartment: Apartment) -> None:
         with Session(self.engine) as session:
             session.add(apartment)
