@@ -32,6 +32,7 @@ class Apartment(Base):
     apartment_id: Mapped[int]
     status: Mapped[bool]
     product_id: Mapped[int]
+    property_type: Mapped[str]
     area: Mapped[int]
     url: Mapped[str]
     rooms: Mapped[float]
