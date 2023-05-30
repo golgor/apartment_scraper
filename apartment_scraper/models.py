@@ -31,7 +31,7 @@ class Apartment(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     apartment_id: Mapped[int]
     status: Mapped[bool]
-    product_id: Mapped[int]
+    product_id: Mapped[str]
     property_type: Mapped[str]
     area: Mapped[int]
     url: Mapped[str]
