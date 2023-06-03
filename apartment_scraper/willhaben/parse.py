@@ -200,9 +200,15 @@ def parse_product_id_attribute(response: dict[str, Any]) -> str:
             0
         ]
         return ProductId(int(product_id)).name.lower()
-    except Exception:
-        if product_id:
-            return product_id
+    except ValueError as e:
+        if local_product_id := locals().get("product_id", None):
+            print(
+                f"Failed to convert product_id={local_product_id} to ProductId enum"
+            )
+            return str(local_product_id)
+        else:
+            return ""
+    except Exception as e:
         print(
             "Failed to parse the field 'PRODUCT_ID' for "
             f"id={response['id']}"

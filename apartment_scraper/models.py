@@ -31,7 +31,7 @@ class Apartment(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     apartment_id: Mapped[int]
     status: Mapped[bool]
-    product_id: Mapped[int]
+    product_id: Mapped[str]
     property_type: Mapped[str]
     area: Mapped[int]
     url: Mapped[str]
@@ -62,6 +62,9 @@ class Model:
         if not path.exists():
             print("Creating database!")
             Base.metadata.create_all(self.engine)
+
+    def get_engine(self):
+        return self.engine
 
     def add_apartment(self, apartment: Apartment) -> None:
         with Session(self.engine) as session:
