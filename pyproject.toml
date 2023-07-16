@@ -1,6 +1,20 @@
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+[tool.poetry]
+name = "apartment-scraper"
+version = "0.1.0"
+description = "\"Tool for evaluating apartments using APIs from Austrian Immobilien search engines.\""
+authors = ["Robert Nyström <robert.nystrom@toolsense.io>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "apartment_scraper"}]
 
-[tool.black]
-line-length = 79
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "~0.100"
+requests = "~2.31"
+SQLAlchemy = "~2.0"
+uvicorn = "~0.23"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
