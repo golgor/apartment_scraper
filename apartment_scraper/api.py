@@ -23,9 +23,7 @@ def query_all_apartments(
         raise HTTPException(
             status_code=413, detail="Pagesize cannot be greater than 500"
         )
-    data, elements, count = model.get_paged_apartments(
-        page=page, pagesize=pagesize
-    )
+    data, elements, count = model.get_paged_apartments(page=page, pagesize=pagesize)
     return {
         "pagesize": pagesize,
         "page": page,

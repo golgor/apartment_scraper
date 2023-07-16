@@ -33,6 +33,9 @@ docker_up:
 docker_down:
 	docker compose down
 
+docker_build:
+	docker build -t apartment-scraper .
+
 clean:
 	poetry env remove --all
 	find -type d | grep __pycache__ | xargs rm -rf
