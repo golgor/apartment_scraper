@@ -18,8 +18,8 @@ async def validation_exception_handler(request, exc: ResponseValidationError):
     return PlainTextResponse(str(exc), status_code=400)
 
 
-@app.get("/")
-def read_root():
+@app.get("/", response_model=dict[str, str])
+def read_root() -> dict[str, str]:
     return {"Hello": "World"}
 
 
