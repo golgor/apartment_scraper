@@ -31,7 +31,7 @@ class Apartment(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     apartment_id: Mapped[int]
     status: Mapped[bool]
-    product_id: Mapped[int]
+    product_id: Mapped[str]
     area: Mapped[int]
     url: Mapped[str]
     rooms: Mapped[float]
@@ -40,7 +40,7 @@ class Apartment(Base):
     post_code: Mapped[str]
     location: Mapped[str]
     coordinates: Mapped[Optional[str]]
-    price: Mapped[Optional[int]]
+    price: Mapped[Optional[float]]
     price_per_area: Mapped[Optional[float]]
     free_area_type = Column(JSON, nullable=True)
     free_area = Column(JSON, nullable=True)
