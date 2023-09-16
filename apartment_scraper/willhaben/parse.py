@@ -221,6 +221,20 @@ def parse_location_attribute(response: dict[str, Any]) -> str:
         return ""
 
 
+def parse_property_type_attribute(response: dict[str, Any]) -> str:
+    try:
+        property_type: str = get_attribute_with_name(
+            response, "PROPERTY_TYPE", ""
+        )[0]
+        return property_type
+    except Exception:
+        print(
+            "Failed to parse the field 'PROPERTY_TYPE' for "
+            f"id={response['id']}"
+        )
+        return ""
+
+
 def calc_rent_per_area(response: dict[str, Any]) -> float:
     try:
         rent = parse_rent_attribute(response)
@@ -241,24 +255,24 @@ def calc_price_per_area(response: dict[str, Any]) -> float:
         return 0
 
 
-class FieldParser:
-    def __init__(self, response: dict[str, Any]):
-        self.response = response
-        self.attributes: list[dict[str, Any]] = response["attributes"][
-            "attribute"
-        ]
+# class FieldParser:
+#     def __init__(self, response: dict[str, Any]):
+#         self.response = response
+#         self.attributes: list[dict[str, Any]] = response["attributes"][
+#             "attribute"
+#         ]
 
-    def get_attr(self, name: str, fallback: Any = None) -> Any:
-        # sourcery skip: use-next, useless-else-on-loop
-        for attribute in self.attributes:
-            if attribute["name"] == name:
-                return attribute["values"]
-        else:
-            return fallback
+#     def get_attr(self, name: str, fallback: Any = None) -> Any:
+#         # sourcery skip: use-next, useless-else-on-loop
+#         for attribute in self.attributes:
+#             if attribute["name"] == name:
+#                 return attribute["values"]
+#         else:
+#             return fallback
 
-    @property
-    def product_id(self) -> ProductId:
-        return ProductId(self.response.get("productId", 0))
+#     @property
+#     def product_id(self) -> ProductId:
+#         return ProductId(self.response.get("productId", 0))
 
 
 # def parse_willhaben_buy_response(
@@ -295,9 +309,8 @@ def parse_willhaben_response(
         Apartment(
             apartment_id=parse_id_attribute(element),
             product_id=parse_product_id_attribute(element),
+            property_type=parse_property_type_attribute(element),
             status=parse_status_attribute(element),
-            # rent=parse_rent_attribute(element),
-            # rent_per_area=calc_rent_per_area(element),
             price=parse_price_attribute(element),
             price_per_area=calc_price_per_area(element),
             area=parse_area_attribute(element),

@@ -32,6 +32,7 @@ class Apartment(Base):
     apartment_id: Mapped[int]
     status: Mapped[bool]
     product_id: Mapped[str]
+    property_type: Mapped[str]
     area: Mapped[int]
     url: Mapped[str]
     rooms: Mapped[float]
@@ -71,6 +72,19 @@ class Model:
         with Session(self.engine) as session:
             session.add_all(apartments)
             session.commit()
+
+    def get_map_data(self) -> list[Apartment]:
+        stmt = select(Apartment).filter(
+            Apartment.post_code >= 1000,
+            Apartment.post_code < 2000,
+            Apartment.rooms >= 3,
+            Apartment.price <= 400_000,
+            Apartment.price > 0,
+            Apartment.product_id != "project",
+        )
+        with Session(self.engine) as session:
+            results = list(session.scalars(stmt))
+        return results
 
     def get_paged_apartments(
         self, page: int, pagesize: int
