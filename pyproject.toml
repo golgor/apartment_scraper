@@ -5,14 +5,14 @@ description = "\"Tool for evaluating apartments using APIs from Austrian Immobil
 authors = ["Robert Nyström <robert.nystrom@toolsense.io>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "apartment_scraper"}]
+packages = [{ include = "apartment_scraper" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "~0.100"
-requests = "~2.31"
-SQLAlchemy = "~2.0"
-uvicorn = "~0.23"
+fastapi = "^0.103.0"
+requests = "^2.31"
+uvicorn = "^0.23"
+sqlmodel = "^0.0.8"
 
 
 [tool.poetry.group.dev.dependencies]
