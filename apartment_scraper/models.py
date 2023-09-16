@@ -1,10 +1,14 @@
 import csv
 import pathlib
-from typing import Any, NamedTuple, Optional
-from sqlmodel import Field, SQLModel, create_engine
+from typing import Any, NamedTuple, Optional, TYPE_CHECKING
+from sqlmodel import Field, SQLModel, create_engine, Session
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from apartment_scraper import pkg_path
+
+
+if TYPE_CHECKING:
+    from sqlalchemy.future.engine import Engine
 
 
 class TransactionResult(NamedTuple):
@@ -34,7 +38,7 @@ class Apartment(SQLModel, table=True):
     free_area: Optional[str]
     image_urls: Optional[str]
     advertiser: str
-    prio: int | None
+    prio: Optional[int]
     updated: Optional[datetime] = Field(
         default=datetime.now(tz=ZoneInfo("UTC"))
     )
@@ -47,7 +51,7 @@ class Model:
             print("Creating database!")
             SQLModel.metadata.create_all(self.engine)
 
-    def get_engine(self):
+    def get_engine(self) -> "Engine":
         return self.engine
 
     def add_apartment(self, apartment: Apartment) -> None:
@@ -158,4 +162,47 @@ class Model:
 
 
 if __name__ == "__main__":
+    apartment = Apartment(
+        apartment_id=1,
+        status=False,
+        product_id="1",
+        property_type="test",
+        area=1,
+        url="test",
+        rooms=1,
+        floor=1,
+        address="test",
+        post_code="test",
+        location="test",
+        coordinates="test",
+        price=1,
+        price_per_area=1,
+        free_area_type="test",
+        free_area="test",
+        image_urls="test",
+        advertiser="test",
+        prio=1,
+    )
+    apartment2 = Apartment(
+        apartment_id=13563,
+        status=False,
+        product_id="1",
+        property_type="test",
+        area=1,
+        url="test",
+        rooms=1,
+        floor=1,
+        address="test",
+        post_code="test",
+        location="test",
+        coordinates="test",
+        price=1,
+        price_per_area=1,
+        free_area_type="test",
+        free_area="test",
+        image_urls="test",
+        advertiser="test",
+        prio=1,
+    )
     model = Model(path=pkg_path.joinpath("test.db"))
+    model.add_apartments([apartment, apartment2])
