@@ -227,13 +227,16 @@ def parse_location_attribute(response: dict[str, Any]) -> str:
         return ""
 
 
-def parse_property_type(response: dict[str, Any]) -> str:
+def parse_property_type_attribute(response: dict[str, Any]) -> str:
     try:
-        property_type: str = get_attribute_with_name(response, "PROPERTY_TYPE", "")[0]
+        property_type: str = get_attribute_with_name(
+            response, "PROPERTY_TYPE", ""
+        )[0]
         return property_type
     except Exception:
         print(
-            "Failed to parse the field 'PROPERTY_TYPE' for " f"id={response['id']}"
+            "Failed to parse the field 'PROPERTY_TYPE' for "
+            f"id={response['id']}"
         )
         return ""
 
@@ -265,7 +268,7 @@ def parse_willhaben_response(
         Apartment(
             apartment_id=parse_id_attribute(element),
             product_id=parse_product_id_attribute(element),
-            property_type=parse_property_type(element),
+            property_type=parse_property_type_attribute(element),
             status=parse_status_attribute(element),
             price=parse_price_attribute(element),
             price_per_area=calc_price_per_area(element),

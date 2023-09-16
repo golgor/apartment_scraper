@@ -41,7 +41,7 @@ class Apartment(Base):
     post_code: Mapped[str]
     location: Mapped[str]
     coordinates: Mapped[Optional[str]]
-    price: Mapped[Optional[int]]
+    price: Mapped[Optional[float]]
     price_per_area: Mapped[Optional[float]]
     free_area_type = Column(JSON, nullable=True)
     free_area = Column(JSON, nullable=True)
@@ -75,6 +75,19 @@ class Model:
         with Session(self.engine) as session:
             session.add_all(apartments)
             session.commit()
+
+    def get_map_data(self) -> list[Apartment]:
+        stmt = select(Apartment).filter(
+            Apartment.post_code >= 1000,
+            Apartment.post_code < 2000,
+            Apartment.rooms >= 3,
+            Apartment.price <= 400_000,
+            Apartment.price > 0,
+            Apartment.product_id != "project",
+        )
+        with Session(self.engine) as session:
+            results = list(session.scalars(stmt))
+        return results
 
     def get_paged_apartments(
         self, page: int, pagesize: int

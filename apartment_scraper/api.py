@@ -1,11 +1,26 @@
-import schemas
 from fastapi import FastAPI, HTTPException
+from fastapi.exceptions import ResponseValidationError
+from fastapi.responses import PlainTextResponse
 
-from apartment_scraper import pkg_path
+from apartment_scraper import pkg_path, schemas
 from apartment_scraper.models import Apartment, Model
 
 app = FastAPI()
 model = Model(path=pkg_path.joinpath("test.db"))
+
+
+@app.exception_handler(ResponseValidationError)
+async def validation_exception_handler(request, exc: ResponseValidationError):
+    errors = exc.errors()
+    for error in errors:
+        print(f"Parameter location: {error['loc']}")
+        print(f"Debug message: {error['msg']}")
+    return PlainTextResponse(str(exc), status_code=400)
+
+
+@app.get("/", response_model=dict[str, str])
+def read_root() -> dict[str, str]:
+    return {"Hello": "World"}
 
 
 @app.get(
