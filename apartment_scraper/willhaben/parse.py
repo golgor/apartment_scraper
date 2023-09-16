@@ -11,7 +11,7 @@ class ProductId(Enum):
     PRIVATE_RENTAL = 200
     RENTAL = 227
     PROJECT = 270
-    EIGENTUMSWOHNUNG = 223
+    EIGENTUM = 223
 
 
 def get_attribute_with_name(
@@ -200,9 +200,15 @@ def parse_product_id_attribute(response: dict[str, Any]) -> str:
             0
         ]
         return ProductId(int(product_id)).name.lower()
-    except Exception:
-        if product_id:
-            return product_id
+    except ValueError as e:
+        if local_product_id := locals().get("product_id", None):
+            print(
+                f"Failed to convert product_id={local_product_id} to ProductId enum"
+            )
+            return str(local_product_id)
+        else:
+            return ""
+    except Exception as e:
         print(
             "Failed to parse the field 'PRODUCT_ID' for "
             f"id={response['id']}"
@@ -253,53 +259,6 @@ def calc_price_per_area(response: dict[str, Any]) -> float:
     except Exception:
         print("Failed to calculate price/area for " f"id={response['id']}")
         return 0
-
-
-# class FieldParser:
-#     def __init__(self, response: dict[str, Any]):
-#         self.response = response
-#         self.attributes: list[dict[str, Any]] = response["attributes"][
-#             "attribute"
-#         ]
-
-#     def get_attr(self, name: str, fallback: Any = None) -> Any:
-#         # sourcery skip: use-next, useless-else-on-loop
-#         for attribute in self.attributes:
-#             if attribute["name"] == name:
-#                 return attribute["values"]
-#         else:
-#             return fallback
-
-#     @property
-#     def product_id(self) -> ProductId:
-#         return ProductId(self.response.get("productId", 0))
-
-
-# def parse_willhaben_buy_response(
-#     elements: list[dict[str, Any]]
-# ) -> list[ApartmentBuy]:
-#     apartment_list: list[ApartmentBuy] = [
-#         ApartmentBuy(
-#             apartment_id=parse_id_attribute(element),
-#             product_id=parse_product_id_attribute(element),
-#             price=parse_price_attribute(element),
-#             area=parse_area_attribute(element),
-#             url=parse_url_attribute(element),
-#             post_code=parse_post_code_attribute(element),
-#             rooms=parse_room_attribute(element),
-#             floor=parse_floor_attribute(element),
-#             price_per_area=calc_price_per_area(element),
-#             advertiser=parser_advertiser_attribute(element),
-#             status=parse_status_attribute(element),
-#             address=parse_address_attribute(element),
-#             image_urls=parse_image_urls_attribute(element),
-#             coordinates=parse_coordinates_attribute(element),
-#             free_area_type=parse_free_area_type_name_attribute(element),
-#             free_area=parse_free_area_attribute(element),
-#         )
-#         for element in elements
-#     ]
-#     return apartment_list
 
 
 def parse_willhaben_response(
