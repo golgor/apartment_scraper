@@ -25,10 +25,10 @@ ruff: ci
 	${RUN} ruff check .
 
 run_docker: ci
-	docker compose --profile web up --build --attach web
+	docker compose up --build --attach web
 
 docker_up:
-	docker compose --profile db up --build -d
+	docker compose up --build -d
 
 docker_down:
 	docker compose down
@@ -42,5 +42,3 @@ clean:
 	find -type d | grep .*_cache | xargs rm -rf
 	rm -rf *.eggs *.egg-info dist build docs/_build .cache .mypy_cache coverage/*
 	rm requirements.txt
-
-# sudo docker rmi $(sudo docker images -f "dangling=true" -q)
