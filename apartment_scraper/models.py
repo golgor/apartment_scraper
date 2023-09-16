@@ -1,19 +1,10 @@
 import csv
 import pathlib
 from typing import Any, NamedTuple, Optional
-
-from sqlalchemy import (
-    Column,
-    DateTime,
-    column,
-    create_engine,
-    func,
-    select,
-    table,
-    update,
-)
-from sqlalchemy.dialects.sqlite import JSON
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
+from sqlmodel import Field, SQLModel, create_engine
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from apartment_scraper import pkg_path
 
 
 class TransactionResult(NamedTuple):
@@ -22,46 +13,39 @@ class TransactionResult(NamedTuple):
     total_count: int
 
 
-class Base(DeclarativeBase):
-    pass
-
-
-class Apartment(Base):
+class Apartment(SQLModel, table=True):
     __tablename__ = "apartments"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    apartment_id: Mapped[int]
-    status: Mapped[bool]
-    product_id: Mapped[str]
-    property_type: Mapped[str]
-    area: Mapped[int]
-    url: Mapped[str]
-    rooms: Mapped[float]
-    floor: Mapped[int]
-    address: Mapped[str]
-    post_code: Mapped[str]
-    location: Mapped[str]
-    coordinates: Mapped[Optional[str]]
-    price: Mapped[Optional[float]]
-    price_per_area: Mapped[Optional[float]]
-    free_area_type = Column(JSON, nullable=True)
-    free_area = Column(JSON, nullable=True)
-    image_urls = Column(JSON, nullable=True)
-    advertiser: Mapped[str]
-    prio: Mapped[Optional[int]]
-    created = Column(DateTime(timezone=True), server_default=func.now())
-    updated = Column(DateTime(timezone=True), onupdate=func.now())
+    id: Optional[int] = Field(default=None, primary_key=True)
+    apartment_id: int
+    status: bool
+    product_id: str
+    property_type: str
+    area: int
+    url: str
+    rooms: float
+    floor: int
+    address: str
+    post_code: str
+    location: str
+    coordinates: str | None
+    price: float | None
+    price_per_area: float | None
+    free_area_type: Optional[str]
+    free_area: Optional[str]
+    image_urls: Optional[str]
+    advertiser: str
+    prio: int | None
+    updated: Optional[datetime] = Field(
+        default=datetime.now(tz=ZoneInfo("UTC"))
+    )
 
 
 class Model:
     def __init__(self, path: pathlib.Path) -> None:
-        self.engine = create_engine(
-            f"sqlite:///{str(path)}",
-            echo=False,
-            connect_args={"check_same_thread": False},
-        )
+        self.engine = create_engine(f"sqlite:///{str(path)}", echo=False)
         if not path.exists():
             print("Creating database!")
-            Base.metadata.create_all(self.engine)
+            SQLModel.metadata.create_all(self.engine)
 
     def get_engine(self):
         return self.engine
@@ -171,3 +155,7 @@ class Model:
                             item.free_area,
                         ]
                     )
+
+
+if __name__ == "__main__":
+    model = Model(path=pkg_path.joinpath("test.db"))
