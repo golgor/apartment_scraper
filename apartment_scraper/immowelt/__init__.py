@@ -4,11 +4,11 @@ from typing import Any, Protocol, Self
 import httpx
 from loguru import logger
 
-from apartment_scraper.immowelt.parse import parse_immowelt_response
+# from apartment_scraper.immowelt.parse import parse_immowelt_response
 from apartment_scraper.immowelt.request import WohnungenWien
 
 
-__all__ = ["parse_immowelt_response", "get_immowelt_token", "WohnungenWien"]
+__all__ = ["get_immowelt_token", "WohnungenWien"]
 
 
 class NoConnectionError(Exception):
@@ -89,9 +89,9 @@ def get_data(obj: ImmoweltRequest) -> list[dict[str, Any]]:
         if not response.get("pageElementCount"):
             break
 
-        print(f"Successfull request for page {obj.page}")
+        logger.info(f"Successfull request for page {obj.page}")
         summed_rows += len(response["data"])
-        print(f"Requested {summed_rows} / {response['totalCount']}")
+        logger.info(f"Requested {summed_rows} / {response['totalCount']}")
 
         obj.page += 1
         data.extend(response["data"])
