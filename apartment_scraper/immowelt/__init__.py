@@ -1,13 +1,14 @@
 from time import sleep
 from typing import Any, Protocol, Self
 
-import requests
+import httpx
+from loguru import logger
 
-from apartment_scraper.immowelt.parse import parse_immowelt_response
+# from apartment_scraper.immowelt.parse import parse_immowelt_response
 from apartment_scraper.immowelt.request import WohnungenWien
 
 
-__all__ = ["parse_immowelt_response", "get_immowelt_token", "WohnungenWien"]
+__all__ = ["get_immowelt_token", "WohnungenWien"]
 
 
 class NoConnectionError(Exception):
@@ -55,6 +56,10 @@ class ImmoweltTokenRequest:
 
 
 def get_immowelt_token() -> str:
+    """Function to get the access token for the immowelt api.
+
+    This is needed later in order to get the data from the api.
+    """
     tr = ImmoweltTokenRequest()
     response = _perform_request(
         body=tr.body,
@@ -69,11 +74,11 @@ def _perform_request(
     url: str, header: dict[str, str], body: dict[str, str | int]
 ) -> dict[str, Any]:
     try:
-        response = requests.post(url=url, data=body, headers=header)
+        response = httpx.post(url=url, data=body, headers=header)
         response.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        print(response.content.decode("utf-8"))
-        raise NoConnectionError(f"HTTP Error: {e.response.status_code}") from e
+    except httpx.HTTPError as e:
+        logger.error(response.content.decode("utf-8"))
+        raise NoConnectionError from e
     except Exception as e:
         raise NoConnectionError(e) from e
     return response.json()
@@ -88,9 +93,9 @@ def get_data(obj: ImmoweltRequest) -> list[dict[str, Any]]:
         if not response.get("pageElementCount"):
             break
 
-        print(f"Successfull request for page {obj.page}")
+        logger.info(f"Successfull request for page {obj.page}")
         summed_rows += len(response["data"])
-        print(f"Requested {summed_rows} / {response['totalCount']}")
+        logger.info(f"Requested {summed_rows} / {response['totalCount']}")
 
         obj.page += 1
         data.extend(response["data"])

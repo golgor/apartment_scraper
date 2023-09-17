@@ -1,3 +1,4 @@
+import json
 from enum import Enum
 from typing import Any
 
@@ -48,12 +49,12 @@ def parse_price_attribute(response: dict[str, Any]) -> float:
         float: The parsed 'PRICE' attribute as a float.
     """
     try:
-        price = get_attribute_with_name(response, "PRICE")[0]
+        price = float(get_attribute_with_name(response, "PRICE")[0])
     except Exception:
         logger.warning(f"Failed to parse the field 'PRICE' for id={response['id']}")
         return 0
     else:
-        return float(price)
+        return price
 
 
 def parse_url_attribute(response: dict[str, Any]) -> str:
@@ -96,7 +97,7 @@ def parser_advertiser_attribute(response: dict[str, Any]) -> str:
         return advertiser
 
 
-def parse_post_code_attribute(response: dict[str, Any]) -> str:
+def parse_post_code_attribute(response: dict[str, Any]) -> int:
     """Parses the 'POSTCODE' attribute from a response dictionary and returns it as a string.
 
     Args:
@@ -109,15 +110,15 @@ def parse_post_code_attribute(response: dict[str, Any]) -> str:
         None.
     """
     try:
-        postcode = get_attribute_with_name(response, "POSTCODE")[0]
+        postcode = int(get_attribute_with_name(response, "POSTCODE")[0])
     except Exception:
         logger.warning(f"Failed to parse the field 'POSTCODE' for id={response['id']}")
-        return ""
+        return 0
     else:
         return postcode
 
 
-def parse_id_attribute(response: dict[str, Any]) -> str:
+def parse_id_attribute(response: dict[str, Any]) -> int:
     """Parses the 'ID' attribute from a response dictionary and returns it as a string.
 
     The 'ID' is a unique identifier for an apartment.
@@ -128,11 +129,16 @@ def parse_id_attribute(response: dict[str, Any]) -> str:
     Returns:
         str: The parsed 'ID' attribute as a string.
     """
-    apartment_id: str = response["id"]
-    return apartment_id
+    try:
+        apartment_id = int(response["id"])
+    except Exception:
+        logger.warning(f"Failed to parse the field 'ID' for id={response['id']}")
+        return 0
+    else:
+        return apartment_id
 
 
-def parse_area_attribute(response: dict[str, Any]) -> float:
+def parse_area_attribute(response: dict[str, Any]) -> int:
     """Parses the 'ESTATE_SIZE/LIVING_AREA' attribute from a response dictionary and returns it as a float.
 
     Args:
@@ -145,7 +151,7 @@ def parse_area_attribute(response: dict[str, Any]) -> float:
         None.
     """
     try:
-        area = float(get_attribute_with_name(response, "ESTATE_SIZE/LIVING_AREA")[0])
+        area = int(get_attribute_with_name(response, "ESTATE_SIZE/LIVING_AREA")[0])
     except Exception:
         logger.warning(
             f"Failed to parse the field 'ESTATE_SIZE/LIVING_AREA' for id={response['id']}"
@@ -260,7 +266,7 @@ def parse_free_area_attribute(response: dict[str, Any]) -> int:
         return 0
 
 
-def parse_free_area_type_name_attribute(response: dict[str, Any]) -> list[str]:
+def parse_free_area_type_name_attribute(response: dict[str, Any]) -> str:
     """Parses the 'FREE_AREA_TYPE_NAME' attribute from a response dictionary and returns it as a list of strings.
 
     Args:
@@ -281,8 +287,8 @@ def parse_free_area_type_name_attribute(response: dict[str, Any]) -> list[str]:
             "Failed to parse the field 'FREE_AREA_TYPE_NAME' for "
             f"id={response['id']}"
         )
-        return []
-    return free_area_type
+        return json.dumps([])
+    return json.dumps(free_area_type)
 
 
 def parse_status_attribute(response: dict[str, Any]) -> bool:
@@ -298,7 +304,7 @@ def parse_status_attribute(response: dict[str, Any]) -> bool:
     return active == "active"
 
 
-def parse_image_urls_attribute(response: dict[str, Any]) -> list[str]:
+def parse_image_urls_attribute(response: dict[str, Any]) -> str:
     """Parses the 'ALL_IMAGE_URLS' attribute from a response dictionary and returns a list of formatted URL strings.
 
     Args:
@@ -314,14 +320,14 @@ def parse_image_urls_attribute(response: dict[str, Any]) -> list[str]:
     try:
         urls: str = get_attribute_with_name(response, "ALL_IMAGE_URLS")[0]
         if urls:
-            return [f"https://cache.willhaben.at/mmo/{url}" for url in urls.split(";")]
+            return json.dumps([f"https://cache.willhaben.at/mmo/{url}" for url in urls.split(";")])
         else:
-            return []
+            return json.dumps([])
     except Exception:
         logger.warning(
             f"Failed to parse the field 'ALL_IMAGE_URLS' for id={response['id']}"
         )
-        return []
+        return json.dumps([])
 
 
 def parse_coordinates_attribute(response: dict[str, Any]) -> str:
@@ -496,4 +502,5 @@ def parse_apartment(data_dict: dict[str, Any]) -> Apartment:
         free_area_type=parse_free_area_type_name_attribute(data_dict),
         free_area=parse_free_area_attribute(data_dict),
         advertiser=parser_advertiser_attribute(data_dict),
+        prio=0,
     )

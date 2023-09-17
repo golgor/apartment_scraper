@@ -1,18 +1,23 @@
 import json
+from typing import Self
 
 
 class WohnungenWien:
-    def __init__(self, bearer_token: str, page: int = 0, rows: int = 500) -> None:
+    """Apartments class."""
+    def __init__(self: Self, bearer_token: str, page: int = 0, rows: int = 500) -> None:
+        """Initialize class."""
         self.bearer_token = bearer_token
         self._page = page
         self.rows = rows
 
     @property
-    def url(self) -> str:
+    def url(self: Self) -> str:
+        """The url to fetch the apartments from."""
         return "https://api.immowelt.com/residentialsearch/v1/searches"
 
     @property
-    def header(self) -> dict[str, str]:
+    def header(self: Self) -> dict[str, str]:
+        """The header to use in the request."""
         return {
             "accept": "application/json",
             "content-type": "application/json",
@@ -24,15 +29,17 @@ class WohnungenWien:
         }
 
     @property
-    def page(self) -> int:
+    def page(self: Self) -> int:
+        """The page to fetch."""
         return self._page
 
     @page.setter
-    def page(self, value: int):
+    def page(self: Self, value: int) -> None:
         self._page = value
 
     @property
-    def body(self) -> str:
+    def body(self: Self) -> str:
+        """The body of the request."""
         return json.dumps(
             {
                 "estateType": "APARTMENT",
