@@ -4,6 +4,7 @@ from time import perf_counter
 from typing import Any, Protocol
 
 import httpx
+from loguru import logger
 
 from apartment_scraper import willhaben
 from apartment_scraper.models import Apartment
@@ -109,7 +110,7 @@ async def get_data(obj: WillhabenRequest) -> list[Apartment]:
             for page in range(1, 5)
         )
         data: list[list[Apartment]] = await asyncio.gather(*tasks)
-        print(f"Time with tasks: {perf_counter() - start_time}")
+        logger.info(f"Time with tasks: {perf_counter() - start_time}")
         return list(itertools.chain(*data))
 
 

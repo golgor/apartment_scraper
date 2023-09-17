@@ -14,6 +14,7 @@ requests = "~2.31"
 SQLAlchemy = "~2.0"
 uvicorn = "~0.23"
 httpx = { extras = ["http2"], version = "^0.25.0" }
+loguru = "^0.7.2"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -61,7 +62,7 @@ select = [
     "INP", # flake8-no-pep420
 ]
 
-ignore = ["D104", "D100", "D203", "D213", "S101"]
+ignore = ["D104", "D100", "D203", "D213", "S101", "RET505"]
 
 # Extend with RUF100, to check for unused noqa.
 extend-select = ["RUF100"]

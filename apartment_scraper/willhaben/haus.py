@@ -33,7 +33,7 @@ class Haus:
         return self._page
 
     @page.setter
-    def page(self: Self, value: int):
+    def page(self: Self, value: int) -> None:
         self._page = value
 
     @property
