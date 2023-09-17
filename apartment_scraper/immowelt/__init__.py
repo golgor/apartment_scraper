@@ -1,7 +1,8 @@
 from time import sleep
 from typing import Any, Protocol, Self
 
-import requests
+import httpx
+from loguru import logger
 
 from apartment_scraper.immowelt.parse import parse_immowelt_response
 from apartment_scraper.immowelt.request import WohnungenWien
@@ -69,11 +70,11 @@ def _perform_request(
     url: str, header: dict[str, str], body: dict[str, str | int]
 ) -> dict[str, Any]:
     try:
-        response = requests.post(url=url, data=body, headers=header)
+        response = httpx.post(url=url, data=body, headers=header)
         response.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        print(response.content.decode("utf-8"))
-        raise NoConnectionError(f"HTTP Error: {e.response.status_code}") from e
+    except httpx.HTTPError as e:
+        logger.error(response.content.decode("utf-8"))
+        raise NoConnectionError(f"HTTP Error: {e}") from e
     except Exception as e:
         raise NoConnectionError(e) from e
     return response.json()

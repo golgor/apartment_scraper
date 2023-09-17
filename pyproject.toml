@@ -10,7 +10,6 @@ packages = [{ include = "apartment_scraper" }]
 [tool.poetry.dependencies]
 python = "^3.11"
 fastapi = "^0.103.0"
-requests = "^2.31"
 uvicorn = "^0.23"
 sqlmodel = "^0.0.8"
 httpx = {extras = ["http2"], version = "^0.25.0"}
