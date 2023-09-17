@@ -1,7 +1,11 @@
-from time import sleep
 from typing import Any, Protocol
-
-import requests
+import httpx
+from apartment_scraper import willhaben
+import asyncio
+from time import perf_counter
+import itertools
+from apartment_scraper.models import Apartment
+from apartment_scraper.willhaben.parse import parse_apartment
 
 
 class NoConnectionError(Exception):
@@ -38,35 +42,78 @@ class WillhabenRequest(Protocol):
         ...
 
 
-def get_data(obj: WillhabenRequest) -> list[dict[str, Any]]:
-    data: list[dict[str, Any]] = []
-    sum = 0
-    while True:
-        sleep(0.5)
-        response = _perform_request(
-            url=obj.url, header=obj.header, params=obj.params
+async def get_apartments(
+    client: httpx.AsyncClient,
+    url: str,
+    params: dict[str, Any],
+    header: dict[str, Any],
+) -> list[Apartment]:
+    """Async function to get apartments from willhaben.at
+
+    _extended_summary_
+
+    Args:
+        client (httpx.AsyncClient): An async httpx client
+        url (str): A url to get the data from
+        params (dict[str, Any]): Any parameters to pass to the request
+        header (dict[str, Any]): Any headers to pass to the request
+
+    Returns:
+        list[Apartment]: A list of Apartment objects
+    """
+    response = await client.get(url=url, params=params, headers=header)
+
+    raw_data: dict[str, Any] = response.json()
+    apartment_data: list[dict[str, Any]] = raw_data["advertSummaryList"][
+        "advertSummary"
+    ]
+    return [parse_apartment(data) for data in apartment_data]
+
+
+async def get_data(obj: WillhabenRequest) -> list[Apartment]:
+    number_of_rows_per_request = 5
+    headers = {
+        "x-wh-client": "api@willhaben.at;responsive_web;server;1.0.0;desktop",
+        "accept": "application/json",
+    }
+
+    async with httpx.AsyncClient(http2=True) as client:
+        response = await client.get(
+            "https://www.willhaben.at/webapi/iad/search/atz/seo/immobilien/mietwohnungen/wien/wien-1230-liesing",
+            params={"rows": 1, "page": 1},
+            headers=headers,
+            timeout=60,
         )
-        if not response.get("rowsReturned"):
-            break
+        rows_found = response.json()["rowsFound"]
 
-        print(f"Successfull request for page {obj.page}")
-        sum += len(response["advertSummaryList"]["advertSummary"])
-        print(f"Requested {sum} / {response['rowsFound']}")
+        required_pages = rows_found // number_of_rows_per_request
+        if rows_found % number_of_rows_per_request != 0:
+            required_pages += 1
 
-        obj.page += 1
-        data.extend(response["advertSummaryList"]["advertSummary"])
-    return data
+        tasks: list[asyncio.Task[Any]] = []
+        start_time = perf_counter()
+        tasks.extend(
+            asyncio.create_task(
+                get_apartments(
+                    client=client,
+                    url="https://www.willhaben.at/webapi/iad/search/atz/seo/immobilien/mietwohnungen/wien/wien-1230-liesing",
+                    params={
+                        "rows": number_of_rows_per_request,
+                        "page": page,
+                    },
+                    header=headers,
+                )
+            )
+            for page in range(1, 5)
+        )
+        data: list[list[Apartment]] = await asyncio.gather(*tasks)
+        print(f"Time with tasks: {perf_counter() - start_time}")
+        return list(itertools.chain(*data))
 
 
-def _perform_request(
-    url: str, header: dict[str, str], params: dict[str, str | int]
-) -> dict[str, Any]:
-    try:
-        response = requests.get(url=url, headers=header, params=params)
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        print(response.request.url)
-        raise NoConnectionError(f"HTTP Error: {e.response.status_code}") from e
-    except Exception as e:
-        raise NoConnectionError(e) from e
-    return response.json()
+if __name__ == "__main__":
+    area = willhaben.AreaId.WIEN.LIESING
+    wh = willhaben.MietWohnungen(area_id=area)
+    test = asyncio.run(willhaben.get_data(wh))
+    print(test[0].address)
+    print(type(test[0]))
