@@ -2,29 +2,29 @@ from enum import Enum
 
 
 class _Wien(Enum):
-    ALL = 9
-    INNERERSTADT = 117223
-    LEOPOLDSTADT = 117224
-    LANDSTRASSE = 117225
-    WIEDEN = 117226
-    MARGARETEN = 117227
-    MARIAHILF = 117228
-    NEUBAU = 117229
-    JOSEFSTADT = 117230
-    ALSERGRUND = 117231
-    FAVORITEN = 117232
-    SIMMERING = 117233
-    MEIDLING = 117234
-    HIETZING = 117235
-    PENZING = 117236
-    RUDOLFSHEIM_FUNFHAUS = 117237
-    OTTAKRING = 117238
-    HERNALS = 117239
-    WÄHRING = 117240
-    DÖBLING = 117241
-    BRIGITTENAU = 117242
-    FLORIDSDORF = 117243
-    DONAUSTADT = 117244
+    ALL = "wien"
+    INNERESTADT = "wien/wien-1010-innere-stadt"
+    LEOPOLDSTADT = "wien/wien-1020-leopoldstadt"
+    LANDSTRASSE = "wien/wien-1030-landstrasse"
+    WIEDEN = "wien/wien-1040-wieden"
+    MARGARETEN = "wien/wien-1050-margareten"
+    MARIAHILF = "wien/wien-1060-mariahilf"
+    NEUBAU = "wien/wien-1070-neubau"
+    JOSEFSTADT = "wien/wien-1080-josefstadt"
+    ALSERGRUND = "wien/wien-1090-alsergrund"
+    FAVORITEN = "wien/wien-1100-favoriten"
+    SIMMERING = "wien/wien-1110-simmering"
+    MEIDLING = "wien/wien-1120-meidling"
+    HIETZING = "wien/wien-1130-hietzing"
+    PENZING = "wien/wien-1140-penzing"
+    RUDOLFSHEIM_FUNFHAUS = "wien/wien-1150-rudolfsheim-fuenfhaus"
+    OTTAKRING = "wien/wien-1160-ottakring"
+    HERNALS = "wien/wien-1170-hernals"
+    WÄHRING = "wien/wien-1180-währing"
+    DÖBLING = "wien/wien-1190-döbling"
+    BRIGITTENAU = "wien/wien-1200-brigittenau"
+    FLORIDSDORF = "wien/wien-1210-floridsdorf"
+    DONAUSTADT = "wien/wien-1220-donaustadt"
     LIESING = "wien/wien-1230-liesing"
 
 
