@@ -10,6 +10,7 @@ from apartment_scraper import pkg_path
 
 
 if TYPE_CHECKING:
+    from sqlalchemy.engine.cursor import CursorResult
     from sqlalchemy.future.engine import Engine
 
 
@@ -154,20 +155,28 @@ class Model:
         with Session(self.engine) as session:
             return session.query(Apartment).count()
 
-    def update_apartment_prio(self: Self, apartment_id: int, prio: int) -> Apartment | None:
+    def update_apartment_prio(self: Self, apartment_id: int, prio: int) -> bool:
+        """Update the priority of an apartment.
+
+        Args:
+            apartment_id (int): The id of an apartment.
+            prio (int): The new priority of the apartment.
+
+        Returns:
+            Apartment | None: Returns the updated apartment or None if the apartment does not exist.
+        """
         stmt = (
             update(Apartment)
             .where(Apartment.apartment_id == apartment_id)
             .values(prio=prio)
-            .returning(Apartment)
         )
 
         with Session(self.engine) as session:
-            result = session.execute(stmt).scalar_one_or_none()
-            if result:
-                session.expunge(result)
+            result: "CursorResult" = session.execute(stmt)
+            row_count: int = result.rowcount
             session.commit()
-        return result
+
+        return bool(row_count)
 
 
 if __name__ == "__main__":

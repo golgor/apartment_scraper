@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import PlainTextResponse
 from loguru import logger
@@ -63,7 +63,7 @@ def query_all_apartments(
         HTTPException: In case of demanding a page size greater than 500.
 
     Returns:
-        dict[str, int | list[Apartment]]: Returns a list of data regarding the query as well as 
+        dict[str, int | list[Apartment]]: Returns a list of data regarding the query as well as the data itself.
     """
     if pagesize > MAX_PAGE_SIZE:
         raise HTTPException(
@@ -93,16 +93,15 @@ def query_apartment_by_id(apartment_id: int) -> Apartment:
 
 
 @app.put(
-    "/apartments/{apartment_id}",
-    response_model=dict[str, schemas.ApartmentSchema],
+    "/apartments/{apartment_id}"
 )
-def add_apartment(
+def update_prio_of_apartment(
     apartment_id: int,
     prio: int,
-) -> dict[str, Apartment]:
-    result = model.update_apartment_prio(apartment_id=apartment_id, prio=prio)
-    if result is None:
+) -> Response:
+    """Function to update the priority of an apartment."""
+    if not model.update_apartment_prio(apartment_id=apartment_id, prio=prio):
         raise HTTPException(
             status_code=404, detail=f"Apartment {apartment_id} not found"
         )
-    return {"updated": result}
+    return Response(status_code=204)
