@@ -21,7 +21,7 @@ class TransactionResult(NamedTuple):
 
 class Apartment(SQLModel, table=True):
     __tablename__ = "apartments"
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     apartment_id: int
     status: bool
     product_id: str
@@ -29,19 +29,19 @@ class Apartment(SQLModel, table=True):
     area: int
     url: str
     rooms: float
-    floor: int
+    floor: float
     address: str
-    post_code: str
+    post_code: int
     location: str
     coordinates: str | None
-    price: float | None
+    price: float
     price_per_area: float | None
-    free_area_type: Optional[str]
-    free_area: Optional[str]
-    image_urls: Optional[str]
+    free_area_type: str | None
+    free_area: int | None
+    image_urls: str | None
     advertiser: str
-    prio: Optional[int]
-    updated: Optional[datetime] = Field(
+    prio: int = 0
+    updated: datetime | None = Field(
         default=datetime.now(tz=ZoneInfo("UTC"))
     )
 
@@ -57,8 +57,9 @@ class Model:
             self (Self): _description_
             path (pathlib.Path): _description_
         """
+        self.engine = create_engine(f"sqlite:///{path}", echo=False)
         if not path.exists():
-            print("Creating database!")
+            logger.info("Creating database!")
             SQLModel.metadata.create_all(self.engine)
 
     def get_engine(self: Self) -> "Engine":
@@ -179,13 +180,13 @@ if __name__ == "__main__":
         rooms=1,
         floor=1,
         address="test",
-        post_code="test",
+        post_code=123,
         location="test",
         coordinates="test",
         price=1,
         price_per_area=1,
         free_area_type="test",
-        free_area="test",
+        free_area=0,
         image_urls="test",
         advertiser="test",
         prio=1,
@@ -200,13 +201,13 @@ if __name__ == "__main__":
         rooms=1,
         floor=1,
         address="test",
-        post_code="test",
+        post_code=12345,
         location="test",
         coordinates="test",
         price=1,
         price_per_area=1,
         free_area_type="test",
-        free_area="test",
+        free_area=0,
         image_urls="test",
         advertiser="test",
         prio=1,

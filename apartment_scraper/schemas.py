@@ -8,23 +8,23 @@ class ApartmentSchema(BaseModel):
     apartment_id: int
     status: bool
     product_id: str
+    property_type: str
     area: int
     url: str
     rooms: float
-    floor: int
+    floor: float
     address: str
-    post_code: str
+    post_code: int
     location: str
     coordinates: str | None
-    price: float | None
+    price: float
     price_per_area: float | None
-    free_area_type: list[str] | None
+    free_area_type: str | None
     free_area: int | None
-    image_urls: list[str] | None
+    image_urls: str | None
     advertiser: str
-    prio: int | None
+    prio: int
     updated: datetime.datetime | None
-    created: datetime.datetime
 
     class Config:
         from_attributes = True
