@@ -15,6 +15,7 @@ from apartment_scraper.willhaben.parse import parse_apartment
 class NoConnectionError(Exception):
     pass
 
+
 @dataclass
 class Request:
     """A class to generate urls for willhaben.at.
@@ -43,7 +44,6 @@ class Request:
     def kauf_haus_url(self: Self) -> str:
         """The generated url for rental houses in the specified area."""
         return f"https://www.willhaben.at/webapi/iad/search/atz/seo/immobilien/haus-kaufen/{self.area_id.value}"
-
 
 
 async def get_apartments(
@@ -76,6 +76,28 @@ async def get_apartments(
 
 
 async def get_data(url: str, rows_per_request: int = 200) -> list[Apartment]:
+    """Get apartments from willhaben.at.
+
+    The function will first get the number of rows found for the specified endpoint. It is using 1 row and 1 page to
+    minimize the number of data to be transferred. Then it will calculate the number of pages needed to get all the
+    data. It is adding 1 if the result is not even, as for example 710 needs 8 pages, not 7.
+
+    After that it will create a list of tasks to get the data from the specified endpoint, one for each page. The tasks
+    will be executed with asyncio.gather all data.
+
+    Each task  will return a list of Apartment objects, which means that the result of asyncio.gather will be a list of
+    lists of Apartment objects. To flatten the list of lists, itertools.chain is used.
+
+    Args:
+        url (str): A url to an endpoint where to get the data from.
+        rows_per_request (int, optional): The number of rows per request. Defaults to 200.
+
+    Raises:
+        ValueError: If not rows are found for the current endpoint.
+
+    Returns:
+        list[Apartment]: A list of Apartment objects.
+    """
     header = {
         "accept": "application/json",
         "x-wh-client": ("api@willhaben.at;responsive_web;server;1.0.0;desktop"),

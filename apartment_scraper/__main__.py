@@ -9,7 +9,7 @@ from apartment_scraper.models import Model
 def main() -> None:
     """Main function of the application."""
     model = Model(path=pkg_path.joinpath("test.db"))
-    areas = [willhaben.AreaId.WIEN.LIESING, willhaben.AreaId.WIEN.DONAUSTADT]
+    areas = [willhaben.AreaId.WIEN.LIESING]
 
     for area in areas:
         wh = willhaben.Request(area_id=area)
@@ -89,5 +89,5 @@ def map() -> None:
 
 
 if __name__ == "__main__":
-    map()
-    # main()
+    # map()
+    main()
