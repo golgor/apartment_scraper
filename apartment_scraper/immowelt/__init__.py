@@ -1,10 +1,11 @@
 from time import sleep
-from typing import Any, Protocol
+from typing import Any, Protocol, Self
 
 import requests
 
 from apartment_scraper.immowelt.parse import parse_immowelt_response
 from apartment_scraper.immowelt.request import WohnungenWien
+
 
 __all__ = ["parse_immowelt_response", "get_immowelt_token", "WohnungenWien"]
 
@@ -15,33 +16,33 @@ class NoConnectionError(Exception):
 
 class ImmoweltRequest(Protocol):
     @property
-    def url(self) -> str:
+    def url(self: Self) -> str:
         ...
 
     @property
-    def header(self) -> dict[str, str]:
+    def header(self: Self) -> dict[str, str]:
         ...
 
     @property
-    def body(self) -> dict[str, str | int] | str:
+    def body(self: Self) -> dict[str, str | int] | str:
         ...
 
     @property
-    def page(self) -> int:
+    def page(self: Self) -> int:
         ...
 
     @page.setter
-    def page(self, value: int):
+    def page(self: Self, value: int) -> None:
         ...
 
 
 class ImmoweltTokenRequest:
     @property
-    def url(self) -> str:
+    def url(self: Self) -> str:
         return "https://api.immowelt.com/auth/oauth/token"
 
     @property
-    def header(self) -> dict[str, str]:
+    def header(self: Self) -> dict[str, str]:
         return {
             "accept": "application/json, text/plain, */*",
             "content-type": "application/x-www-form-urlencoded",
@@ -49,7 +50,7 @@ class ImmoweltTokenRequest:
         }
 
     @property
-    def body(self) -> dict[str, str | int]:
+    def body(self: Self) -> dict[str, str | int]:
         return {"grant_type": "client_credentials"}
 
 
@@ -83,9 +84,7 @@ def get_data(obj: ImmoweltRequest) -> list[dict[str, Any]]:
     summed_rows = 0
     while True:
         sleep(0.5)
-        response = _perform_request(
-            url=obj.url, header=obj.header, body=obj.body
-        )
+        response = _perform_request(url=obj.url, header=obj.header, body=obj.body)
         if not response.get("pageElementCount"):
             break
 

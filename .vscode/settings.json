@@ -1,4 +1,7 @@
 {
-    "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true
+    "black-formatter.args": [
+        "--line-length 119"
+    ],
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-python.black-formatter"
 }

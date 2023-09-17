@@ -74,17 +74,10 @@ class Model:
             Apartment.product_id != "project",
         )
         with Session(self.engine) as session:
-            results = list(session.scalars(stmt))
-        return results
+            return list(session.scalars(stmt))
 
-    def get_paged_apartments(
-        self, page: int, pagesize: int
-    ) -> TransactionResult:
-        stmt = (
-            select(Apartment)
-            .where(Apartment.id > page * pagesize)
-            .limit(pagesize)
-        )
+    def get_paged_apartments(self, page: int, pagesize: int) -> TransactionResult:
+        stmt = select(Apartment).where(Apartment.id > page * pagesize).limit(pagesize)
 
         my_table = table("apartments", column("id"))
         count = select(func.count()).select_from(my_table)
@@ -104,9 +97,7 @@ class Model:
         with Session(self.engine) as session:
             return session.query(Apartment).count()
 
-    def update_apartment_prio(
-        self, apartment_id: int, prio: int
-    ) -> Apartment | None:
+    def update_apartment_prio(self, apartment_id: int, prio: int) -> Apartment | None:
         stmt = (
             update(Apartment)
             .where(Apartment.apartment_id == apartment_id)
@@ -122,43 +113,42 @@ class Model:
         return result
 
     def dump_to_csv(self, filename: str) -> None:
-        with Session(self.engine) as session:
-            with open("dump.csv", "w") as f:
-                out = csv.writer(f)
+        with Session(self.engine) as session, open("dump.csv", "w") as f:
+            out = csv.writer(f)
+            out.writerow(
+                [
+                    "apartment_id",
+                    "area",
+                    "price",
+                    "url",
+                    "rooms",
+                    "floor",
+                    "address",
+                    "post_code",
+                    "price_per_area",
+                    "coordinates",
+                    "free_area_type",
+                    "free_area",
+                ]
+            )
+
+            for item in session.query(Apartment).all():
                 out.writerow(
                     [
-                        "apartment_id",
-                        "area",
-                        "price",
-                        "url",
-                        "rooms",
-                        "floor",
-                        "address",
-                        "post_code",
-                        "price_per_area",
-                        "coordinates",
-                        "free_area_type",
-                        "free_area",
+                        item.apartment_id,
+                        item.area,
+                        item.price,
+                        item.url,
+                        item.rooms,
+                        item.floor,
+                        item.address,
+                        item.post_code,
+                        item.price_per_area,
+                        item.coordinates,
+                        item.free_area_type,
+                        item.free_area,
                     ]
                 )
-
-                for item in session.query(Apartment).all():
-                    out.writerow(
-                        [
-                            item.apartment_id,
-                            item.area,
-                            item.price,
-                            item.url,
-                            item.rooms,
-                            item.floor,
-                            item.address,
-                            item.post_code,
-                            item.price_per_area,
-                            item.coordinates,
-                            item.free_area_type,
-                            item.free_area,
-                        ]
-                    )
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ from fastapi.responses import PlainTextResponse
 from apartment_scraper import pkg_path, schemas
 from apartment_scraper.models import Apartment, Model
 
+
 app = FastAPI()
 model = Model(path=pkg_path.joinpath("test.db"))
 
@@ -34,9 +35,7 @@ def query_all_apartments(
         raise HTTPException(
             status_code=413, detail="Pagesize cannot be greater than 500"
         )
-    data, elements, count = model.get_paged_apartments(
-        page=page, pagesize=pagesize
-    )
+    data, elements, count = model.get_paged_apartments(page=page, pagesize=pagesize)
     return {
         "pagesize": pagesize,
         "page": page,
