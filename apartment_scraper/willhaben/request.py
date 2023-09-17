@@ -1,7 +1,9 @@
 import asyncio
 import itertools
+from dataclasses import dataclass
+from enum import Enum
 from time import perf_counter
-from typing import Any, Protocol
+from typing import Any, Self
 
 import httpx
 from loguru import logger
@@ -13,51 +15,35 @@ from apartment_scraper.willhaben.parse import parse_apartment
 class NoConnectionError(Exception):
     pass
 
+@dataclass
+class Request:
+    """A class to generate urls for willhaben.at.
 
-class WillhabenRequest(Protocol):
-    @property
-    def url(self) -> str:  # noqa: ANN101
-        """The url to get the data from.
+    As the URL depends on the area_id choosen, the actual urls are generated depending on on the input.
+    """
 
-        Returns:
-            str: The url as a string.
-        """
-        ...
+    area_id: Enum
 
     @property
-    def params(self) -> dict[str, str | int]:  # noqa: ANN101
-        """Parameters to add to the request.
-
-        Returns:
-            dict[str, str | int]: _description_
-        """
-        ...
+    def miet_wohnung_url(self: Self) -> str:
+        """The generated url for rental apartments in the specified area."""
+        return f"https://www.willhaben.at/webapi/iad/search/atz/seo/immobilien/mietwohnungen/{self.area_id.value}"
 
     @property
-    def header(self) -> dict[str, str]:  # noqa: ANN101
-        """Headers to add to the request.
-
-        Returns:
-            dict[str, str | int]: _description_
-        """
-        ...
+    def kauf_wohnung_url(self: Self) -> str:
+        """The generated url for apartments to buy in the specified area."""
+        return f"https://www.willhaben.at/webapi/iad/search/atz/seo/immobilien/eigentumswohnung/{self.area_id.value}"
 
     @property
-    def rows(self) -> int:  # noqa: ANN101
-        """The number of rows per request.
-
-        A typical endpoint contains a lot of data and it is not feasible to get all data in one request.
-        This is the number of rows per request, which in turns control how many requests have to be done
-        for a specific endpoint.
-
-        Returns:
-            int: The number of rows per request.
-        """
-        ...
+    def miet_haus_url(self: Self) -> str:
+        """The generated url for rental houses in the specified area."""
+        return f"https://www.willhaben.at/webapi/iad/search/atz/seo/immobilien/haus-mieten/{self.area_id.value}"
 
     @property
-    def area_id(self) -> int:  # noqa: ANN101
-        ...
+    def kauf_haus_url(self: Self) -> str:
+        """The generated url for rental houses in the specified area."""
+        return f"https://www.willhaben.at/webapi/iad/search/atz/seo/immobilien/haus-kaufen/{self.area_id.value}"
+
 
 
 async def get_apartments(
