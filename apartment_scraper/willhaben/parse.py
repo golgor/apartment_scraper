@@ -288,3 +288,26 @@ def parse_willhaben_response(
         for element in elements
     ]
     return apartment_list
+
+
+def parse_apartment(dict: dict[str, Any]) -> Apartment:
+    return Apartment(
+        apartment_id=parse_id_attribute(dict),
+        product_id=parse_product_id_attribute(dict),
+        property_type=parse_property_type_attribute(dict),
+        status=parse_status_attribute(dict),
+        price=parse_price_attribute(dict),
+        price_per_area=calc_price_per_area(dict),
+        area=parse_area_attribute(dict),
+        url=parse_url_attribute(dict),
+        post_code=parse_post_code_attribute(dict),
+        location=parse_location_attribute(dict),
+        rooms=parse_room_attribute(dict),
+        floor=parse_floor_attribute(dict),
+        address=parse_address_attribute(dict),
+        image_urls=parse_image_urls_attribute(dict),
+        coordinates=parse_coordinates_attribute(dict),
+        free_area_type=parse_free_area_type_name_attribute(dict),
+        free_area=parse_free_area_attribute(dict),
+        advertiser=parser_advertiser_attribute(dict),
+    )
