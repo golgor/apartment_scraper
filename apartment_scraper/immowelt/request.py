@@ -2,9 +2,7 @@ import json
 
 
 class WohnungenWien:
-    def __init__(
-        self, bearer_token: str, page: int = 0, rows: int = 500
-    ) -> None:
+    def __init__(self, bearer_token: str, page: int = 0, rows: int = 500) -> None:
         self.bearer_token = bearer_token
         self._page = page
         self.rows = rows
@@ -19,7 +17,10 @@ class WohnungenWien:
             "accept": "application/json",
             "content-type": "application/json",
             "authorization": self.bearer_token,
-            "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+            "user-agent": (
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, "
+                "like Gecko) Chrome/108.0.0.0 Safari/537.36"
+            ),
         }
 
     @property

@@ -7,6 +7,8 @@ PYTHON=${RUN} python
 all:
 	@echo "make ci"
 	@echo "    Create ci environment."
+	@echo "make format"
+	@echo "    Format all files using Black."
 	@echo "make ruff"
 	@echo "    Run 'ruff' to lint project."
 	@echo "make run_docker"
@@ -20,6 +22,9 @@ all:
 
 ci:
 	poetry install --with ci
+
+format:
+	${RUN} black .
 
 ruff: ci
 	${RUN} ruff check .

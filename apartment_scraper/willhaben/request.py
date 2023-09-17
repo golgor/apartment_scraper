@@ -1,72 +1,141 @@
-from time import sleep
-from typing import Any, Protocol
+import asyncio
+import itertools
+from dataclasses import dataclass
+from enum import Enum
+from time import perf_counter
+from typing import Any, Self
 
-import requests
+import httpx
+from loguru import logger
+
+from apartment_scraper.models import Apartment
+from apartment_scraper.willhaben.parse import parse_apartment
 
 
 class NoConnectionError(Exception):
     pass
 
 
-class WillhabenRequest(Protocol):
-    @property
-    def url(self) -> str:
-        ...
+@dataclass
+class Request:
+    """A class to generate urls for willhaben.at.
+
+    As the URL depends on the area_id choosen, the actual urls are generated depending on on the input.
+    """
+
+    area_id: Enum
 
     @property
-    def params(self) -> dict[str, str | int]:
-        ...
+    def miet_wohnung_url(self: Self) -> str:
+        """The generated url for rental apartments in the specified area."""
+        return f"https://www.willhaben.at/webapi/iad/search/atz/seo/immobilien/mietwohnungen/{self.area_id.value}"
 
     @property
-    def header(self) -> dict[str, str]:
-        ...
+    def kauf_wohnung_url(self: Self) -> str:
+        """The generated url for apartments to buy in the specified area."""
+        return f"https://www.willhaben.at/webapi/iad/search/atz/seo/immobilien/eigentumswohnung/{self.area_id.value}"
 
     @property
-    def rows(self) -> int:
-        ...
+    def miet_haus_url(self: Self) -> str:
+        """The generated url for rental houses in the specified area."""
+        return f"https://www.willhaben.at/webapi/iad/search/atz/seo/immobilien/haus-mieten/{self.area_id.value}"
 
     @property
-    def page(self) -> int:
-        ...
-
-    @page.setter
-    def page(self, value: int):
-        ...
-
-    @property
-    def area_id(self) -> int:
-        ...
+    def kauf_haus_url(self: Self) -> str:
+        """The generated url for rental houses in the specified area."""
+        return f"https://www.willhaben.at/webapi/iad/search/atz/seo/immobilien/haus-kaufen/{self.area_id.value}"
 
 
-def get_data(obj: WillhabenRequest) -> list[dict[str, Any]]:
-    data: list[dict[str, Any]] = []
-    sum = 0
-    while True:
-        sleep(0.5)
-        response = _perform_request(
-            url=obj.url, header=obj.header, params=obj.params
+async def get_apartments(
+    client: httpx.AsyncClient,
+    url: str,
+    params: dict[str, Any],
+    header: dict[str, Any],
+) -> list[Apartment]:
+    """Async function to get apartments from willhaben.at.
+
+    _extended_summary_
+
+    Args:
+        client (httpx.AsyncClient): An async httpx client
+        url (str): A url to get the data from
+        params (dict[str, Any]): Any parameters to pass to the request
+        header (dict[str, Any]): Any headers to pass to the request
+
+    Returns:
+        list[Apartment]: A list of Apartment objects
+    """
+    logger.info(f"Page: {params['page']}")
+    response = await client.get(url=url, params=params, headers=header)
+
+    raw_data: dict[str, Any] = response.json()
+    apartment_data: list[dict[str, Any]] = raw_data["advertSummaryList"][
+        "advertSummary"
+    ]
+    return [parse_apartment(data) for data in apartment_data]
+
+
+async def get_data(url: str, rows_per_request: int = 200) -> list[Apartment]:
+    """Get apartments from willhaben.at.
+
+    The function will first get the number of rows found for the specified endpoint. It is using 1 row and 1 page to
+    minimize the number of data to be transferred. Then it will calculate the number of pages needed to get all the
+    data. It is adding 1 if the result is not even, as for example 710 needs 8 pages, not 7.
+
+    After that it will create a list of tasks to get the data from the specified endpoint, one for each page. The tasks
+    will be executed with asyncio.gather all data.
+
+    Each task  will return a list of Apartment objects, which means that the result of asyncio.gather will be a list of
+    lists of Apartment objects. To flatten the list of lists, itertools.chain is used.
+
+    Args:
+        url (str): A url to an endpoint where to get the data from.
+        rows_per_request (int, optional): The number of rows per request. Defaults to 200.
+
+    Raises:
+        ValueError: If not rows are found for the current endpoint.
+
+    Returns:
+        list[Apartment]: A list of Apartment objects.
+    """
+    header = {
+        "accept": "application/json",
+        "x-wh-client": ("api@willhaben.at;responsive_web;server;1.0.0;desktop"),
+    }
+
+    async with httpx.AsyncClient(http2=True) as client:
+        response = await client.get(
+            url,
+            params={"rows": 1, "page": 1},
+            headers=header,
+            timeout=60,
         )
-        if not response.get("rowsReturned"):
-            break
+        response_json: dict[str, Any] = response.json()
+        rows_found = response_json.get("rowsFound")
+        logger.info(f"Rows found: {rows_found}")
+        if not rows_found:
+            raise ValueError("No rows found")
 
-        print(f"Successfull request for page {obj.page}")
-        sum += len(response["advertSummaryList"]["advertSummary"])
-        print(f"Requested {sum} / {response['rowsFound']}")
+        required_pages = rows_found // rows_per_request
+        if rows_found % rows_per_request != 0:
+            required_pages += 1
 
-        obj.page += 1
-        data.extend(response["advertSummaryList"]["advertSummary"])
-    return data
-
-
-def _perform_request(
-    url: str, header: dict[str, str], params: dict[str, str | int]
-) -> dict[str, Any]:
-    try:
-        response = requests.get(url=url, headers=header, params=params)
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as e:
-        print(response.request.url)
-        raise NoConnectionError(f"HTTP Error: {e.response.status_code}") from e
-    except Exception as e:
-        raise NoConnectionError(e) from e
-    return response.json()
+        tasks: list[asyncio.Task[Any]] = []
+        start_time = perf_counter()
+        tasks.extend(
+            asyncio.create_task(
+                get_apartments(
+                    client=client,
+                    url=url,
+                    params={
+                        "rows": rows_per_request,
+                        "page": page,
+                    },
+                    header=header,
+                )
+            )
+            for page in range(1, required_pages + 1)
+        )
+        data: list[list[Apartment]] = await asyncio.gather(*tasks)
+        logger.info(f"Time with tasks: {perf_counter() - start_time}")
+        return list(itertools.chain(*data))
