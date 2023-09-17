@@ -23,9 +23,7 @@ class Haus:
     def header(self: Self) -> dict[str, str]:
         return {
             "accept": "application/json",
-            "x-wh-client": (
-                "api@willhaben.at;responsive_web;server;1.0.0;desktop"
-            ),
+            "x-wh-client": ("api@willhaben.at;responsive_web;server;1.0.0;desktop"),
         }
 
     @property

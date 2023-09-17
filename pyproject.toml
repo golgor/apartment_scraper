@@ -16,14 +16,10 @@ uvicorn = "~0.23"
 httpx = { extras = ["http2"], version = "^0.25.0" }
 loguru = "^0.7.2"
 
-
-[tool.poetry.group.dev.dependencies]
-mypy = "^1.4.1"
-black = "^23.7.0"
-
-
 [tool.poetry.group.ci.dependencies]
 ruff = "^0.0.290"
+mypy = "^1.4.1"
+black = "^23.7.0"
 
 [build-system]
 requires = ["poetry-core"]

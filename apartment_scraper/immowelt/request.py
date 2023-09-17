@@ -2,9 +2,7 @@ import json
 
 
 class WohnungenWien:
-    def __init__(
-        self, bearer_token: str, page: int = 0, rows: int = 500
-    ) -> None:
+    def __init__(self, bearer_token: str, page: int = 0, rows: int = 500) -> None:
         self.bearer_token = bearer_token
         self._page = page
         self.rows = rows

@@ -15,6 +15,4 @@ browser.get(URL)
 soup = BeautifulSoup(browser.page_source, features="html.parser")
 
 output = Path("output.html")
-results: "ResultSet[Tag]" = soup.find_all(
-    "div", class_="media-wohnung", recursive=True
-)
+results: "ResultSet[Tag]" = soup.find_all("div", class_="media-wohnung", recursive=True)

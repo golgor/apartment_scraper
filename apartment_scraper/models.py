@@ -88,14 +88,8 @@ class Model:
         with Session(self.engine) as session:
             return list(session.scalars(stmt))
 
-    def get_paged_apartments(
-        self, page: int, pagesize: int
-    ) -> TransactionResult:
-        stmt = (
-            select(Apartment)
-            .where(Apartment.id > page * pagesize)
-            .limit(pagesize)
-        )
+    def get_paged_apartments(self, page: int, pagesize: int) -> TransactionResult:
+        stmt = select(Apartment).where(Apartment.id > page * pagesize).limit(pagesize)
 
         my_table = table("apartments", column("id"))
         count = select(func.count()).select_from(my_table)
@@ -115,9 +109,7 @@ class Model:
         with Session(self.engine) as session:
             return session.query(Apartment).count()
 
-    def update_apartment_prio(
-        self, apartment_id: int, prio: int
-    ) -> Apartment | None:
+    def update_apartment_prio(self, apartment_id: int, prio: int) -> Apartment | None:
         stmt = (
             update(Apartment)
             .where(Apartment.apartment_id == apartment_id)

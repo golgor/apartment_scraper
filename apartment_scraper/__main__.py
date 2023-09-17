@@ -4,17 +4,17 @@ import folium
 
 from apartment_scraper import pkg_path, willhaben
 from apartment_scraper.models import Model
+from apartment_scraper.willhaben.wohnungen import WillHabenRequest
 
 
 def main() -> None:
     """Main function of the application."""
     model = Model(path=pkg_path.joinpath("test.db"))
-
-    areas = [willhaben.AreaId.WIEN.INNERESTADT]
+    areas = [willhaben.AreaId.WIEN.BRIGITTENAU]
 
     for area in areas:
-        wh = willhaben.MietWohnungen(area_id=area)
-        apartments = asyncio.run(willhaben.get_data(wh))
+        wh = WillHabenRequest(area_id=area)
+        apartments = asyncio.run(willhaben.get_data(url=wh.kaufwohnung_url))
         model.add_apartments(apartments)
 
 

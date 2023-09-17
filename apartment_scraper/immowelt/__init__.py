@@ -84,9 +84,7 @@ def get_data(obj: ImmoweltRequest) -> list[dict[str, Any]]:
     summed_rows = 0
     while True:
         sleep(0.5)
-        response = _perform_request(
-            url=obj.url, header=obj.header, body=obj.body
-        )
+        response = _perform_request(url=obj.url, header=obj.header, body=obj.body)
         if not response.get("pageElementCount"):
             break
 

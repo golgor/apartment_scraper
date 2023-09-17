@@ -9,6 +9,7 @@ from apartment_scraper.models import Apartment
 
 class ProductId(Enum):
     """Enum for the product id of an apartment."""
+
     UNDEFINED = 0
     PRIVATE_BUY = 100
     PRIVATE_RENTAL = 200
@@ -22,11 +23,7 @@ def get_attribute_with_name(
 ) -> list[str] | Any:
     attributes: list[dict[str, Any]] = response["attributes"]["attribute"]
     return next(
-        (
-            attribute["values"]
-            for attribute in attributes
-            if attribute["name"] == name
-        ),
+        (attribute["values"] for attribute in attributes if attribute["name"] == name),
         fallback,
     )
 
@@ -62,9 +59,7 @@ def parse_url_attribute(response: dict[str, Any]) -> str:
             return f"https://www.willhaben.at/iad/{url}"
         return ""
     except Exception:
-        logger.warning(
-            f"Failed to parse the field 'SEO_URL' for id={response['id']}"
-        )
+        logger.warning(f"Failed to parse the field 'SEO_URL' for id={response['id']}")
         return ""
 
 
@@ -80,9 +75,7 @@ def parse_post_code_attribute(response: dict[str, Any]) -> str:
     try:
         return get_attribute_with_name(response, "POSTCODE", "")[0]
     except Exception:
-        logger.warning(
-            f"Failed to parse the field 'POSTCODE' for id={response['id']}"
-        )
+        logger.warning(f"Failed to parse the field 'POSTCODE' for id={response['id']}")
         return ""
 
 
@@ -93,9 +86,7 @@ def parse_id_attribute(response: dict[str, Any]) -> str:
 
 def parse_area_attribute(response: dict[str, Any]) -> float:
     try:
-        area = get_attribute_with_name(response, "ESTATE_SIZE/LIVING_AREA", 0)[
-            0
-        ]
+        area = get_attribute_with_name(response, "ESTATE_SIZE/LIVING_AREA", 0)[0]
         return float(area)
     except Exception:
         logger.warning(
@@ -111,8 +102,7 @@ def parse_room_attribute(response: dict[str, Any]) -> float:
         return float(area)
     except Exception:
         logger.warning(
-            "Failed to parse the field 'NUMBER_OF_ROOMS' for "
-            f"id={response['id']}"
+            "Failed to parse the field 'NUMBER_OF_ROOMS' for " f"id={response['id']}"
         )
         return 0
 
@@ -128,9 +118,7 @@ def parse_floor_attribute(response: dict[str, Any]) -> float:
 
 def parse_rent_attribute(response: dict[str, Any]) -> float:
     try:
-        rent: str = get_attribute_with_name(
-            response, "RENT/PER_MONTH_LETTINGS", 0
-        )[0]
+        rent: str = get_attribute_with_name(response, "RENT/PER_MONTH_LETTINGS", 0)[0]
         return round(float(rent), 2)
     except Exception:
         logger.warning(f"Failed to parse the field 'RENT' for id={response['id']}")
@@ -141,11 +129,10 @@ def parse_address_attribute(response: dict[str, Any]) -> str:
     try:
         address: str = get_attribute_with_name(response, "ADDRESS", 0)[0]
     except Exception:
-        logger.warning(
-            f"Failed to parse the field 'ADDRESS' for id={response['id']}"
-        )
+        logger.warning(f"Failed to parse the field 'ADDRESS' for id={response['id']}")
         return ""
     return address
+
 
 def parse_free_area_attribute(response: dict[str, Any]) -> int:
     try:
@@ -154,9 +141,7 @@ def parse_free_area_attribute(response: dict[str, Any]) -> int:
         )
         return int(free_area[0])
     except Exception:
-        logger.warning(
-            f"Failed to parse the field 'FREE_AREA' for id={response['id']}"
-        )
+        logger.warning(f"Failed to parse the field 'FREE_AREA' for id={response['id']}")
         return 0
 
 
@@ -184,29 +169,22 @@ def parse_image_urls_attribute(response: dict[str, Any]) -> list[str]:
     try:
         urls: str = get_attribute_with_name(response, "ALL_IMAGE_URLS", "")[0]
         if urls:
-            return [
-                f"https://cache.willhaben.at/mmo/{url}"
-                for url in urls.split(";")
-            ]
+            return [f"https://cache.willhaben.at/mmo/{url}" for url in urls.split(";")]
         else:
             return []
     except Exception:
         logger.warning(
-            "Failed to parse the field 'ALL_IMAGE_URLS' for "
-            f"id={response['id']}"
+            "Failed to parse the field 'ALL_IMAGE_URLS' for " f"id={response['id']}"
         )
         return []
 
 
 def parse_coordinates_attribute(response: dict[str, Any]) -> str:
     try:
-        coordinates: str = get_attribute_with_name(
-            response, "COORDINATES", ""
-        )[0]
+        coordinates: str = get_attribute_with_name(response, "COORDINATES", "")[0]
     except Exception:
         logger.warning(
-            "Failed to parse the field 'COORDINATES' for "
-            f"id={response['id']}"
+            "Failed to parse the field 'COORDINATES' for " f"id={response['id']}"
         )
         return ""
     return coordinates
@@ -214,9 +192,7 @@ def parse_coordinates_attribute(response: dict[str, Any]) -> str:
 
 def parse_product_id_attribute(response: dict[str, Any]) -> str:
     try:
-        product_id: str = get_attribute_with_name(response, "PRODUCT_ID", "")[
-            0
-        ]
+        product_id: str = get_attribute_with_name(response, "PRODUCT_ID", "")[0]
         return ProductId(int(product_id)).name.lower()
     except ValueError:
         if local_product_id := locals().get("product_id", None):
@@ -228,8 +204,7 @@ def parse_product_id_attribute(response: dict[str, Any]) -> str:
             return ""
     except Exception:
         logger.warning(
-            "Failed to parse the field 'PRODUCT_ID' for "
-            f"id={response['id']}"
+            "Failed to parse the field 'PRODUCT_ID' for " f"id={response['id']}"
         )
         return ""
 
@@ -245,14 +220,11 @@ def parse_location_attribute(response: dict[str, Any]) -> str:
 
 def parse_property_type_attribute(response: dict[str, Any]) -> str:
     try:
-        property_type: str = get_attribute_with_name(
-            response, "PROPERTY_TYPE", ""
-        )[0]
+        property_type: str = get_attribute_with_name(response, "PROPERTY_TYPE", "")[0]
         return property_type
     except Exception:
         logger.warning(
-            "Failed to parse the field 'PROPERTY_TYPE' for "
-            f"id={response['id']}"
+            "Failed to parse the field 'PROPERTY_TYPE' for " f"id={response['id']}"
         )
         return ""
 
@@ -277,9 +249,7 @@ def calc_price_per_area(response: dict[str, Any]) -> float:
         return 0
 
 
-def parse_willhaben_response(
-    elements: list[dict[str, Any]]
-) -> list[Apartment]:
+def parse_willhaben_response(elements: list[dict[str, Any]]) -> list[Apartment]:
     apartment_list: list[Apartment] = [
         Apartment(
             apartment_id=parse_id_attribute(element),
