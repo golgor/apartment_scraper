@@ -1,9 +1,10 @@
-import csv
 import pathlib
-from typing import Any, NamedTuple, Optional, TYPE_CHECKING
-from sqlmodel import Field, SQLModel, create_engine, Session
 from datetime import datetime
+from typing import TYPE_CHECKING, Any, NamedTuple, Optional
 from zoneinfo import ZoneInfo
+
+from sqlmodel import Field, Session, SQLModel, create_engine
+
 from apartment_scraper import pkg_path
 
 
@@ -111,44 +112,6 @@ class Model:
                 session.expunge(result)
             session.commit()
         return result
-
-    def dump_to_csv(self, filename: str) -> None:
-        with Session(self.engine) as session, open("dump.csv", "w") as f:
-            out = csv.writer(f)
-            out.writerow(
-                [
-                    "apartment_id",
-                    "area",
-                    "price",
-                    "url",
-                    "rooms",
-                    "floor",
-                    "address",
-                    "post_code",
-                    "price_per_area",
-                    "coordinates",
-                    "free_area_type",
-                    "free_area",
-                ]
-            )
-
-            for item in session.query(Apartment).all():
-                out.writerow(
-                    [
-                        item.apartment_id,
-                        item.area,
-                        item.price,
-                        item.url,
-                        item.rooms,
-                        item.floor,
-                        item.address,
-                        item.post_code,
-                        item.price_per_area,
-                        item.coordinates,
-                        item.free_area_type,
-                        item.free_area,
-                    ]
-                )
 
 
 if __name__ == "__main__":

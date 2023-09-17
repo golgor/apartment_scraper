@@ -15,6 +15,9 @@ from apartment_scraper.willhaben.parse import parse_apartment
 class NoConnectionError(Exception):
     pass
 
+class NoRowsFoundError(Exception):
+    """No rows found for the current endpoint. This means that there is no data to be parsed."""
+
 
 @dataclass
 class Request:
@@ -104,17 +107,22 @@ async def get_data(url: str, rows_per_request: int = 200) -> list[Apartment]:
     }
 
     async with httpx.AsyncClient(http2=True) as client:
-        response = await client.get(
-            url,
-            params={"rows": 1, "page": 1},
-            headers=header,
-            timeout=60,
-        )
+        try:
+            response = await client.get(
+                url,
+                params={"rows": 1, "page": 1},
+                headers=header,
+                timeout=60,
+            )
+        except httpx.HTTPError as e:
+            logger.error(e)
+            raise NoConnectionError from e
+
         response_json: dict[str, Any] = response.json()
         rows_found = response_json.get("rowsFound")
         logger.info(f"Rows found: {rows_found}")
         if not rows_found:
-            raise ValueError("No rows found")
+            raise NoRowsFoundError()
 
         required_pages = rows_found // rows_per_request
         if rows_found % rows_per_request != 0:
