@@ -4,7 +4,8 @@ from pydantic import BaseModel
 
 
 class ApartmentSchema(BaseModel):
-    id: int
+    """Schema for the Apartment model."""
+    id: int  # noqa: A003
     apartment_id: int
     status: bool
     product_id: str
@@ -27,4 +28,5 @@ class ApartmentSchema(BaseModel):
     updated: datetime.datetime | None
 
     class Config:
+        """Schema configuration."""
         from_attributes = True

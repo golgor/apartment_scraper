@@ -77,7 +77,8 @@ def get_price_color(price: int) -> str:
         return "red"
 
 
-def map() -> None:
+def create_map() -> None:
+    """Create a map with all apartments in the database."""
     base_map = folium.Map(location=[48.20849, 16.37208], zoom_start=11)
 
     folium.GeoJson("bezirke_95_geo.json").add_to(base_map)
@@ -91,7 +92,8 @@ def map() -> None:
         folium.Circle(
             location=apartment.coordinates.split(","),
             tooltip=(
-                f"Price: {apartment.price}<br>Area: {apartment.area}<br>Rooms: {apartment.rooms}<br>Price/m2: {apartment.price_per_area}<br>Free area: {apartment.free_area}"
+                f"Price: {apartment.price}<br>Area: {apartment.area}<br>Rooms: {apartment.rooms}<br>"
+                "Price/m2: {apartment.price_per_area}<br>Free area: {apartment.free_area}"
             ),
             popup=f"<a href='{apartment.url}'>{apartment.apartment_id}</a>",
             color=get_rooms_color(apartment.rooms),

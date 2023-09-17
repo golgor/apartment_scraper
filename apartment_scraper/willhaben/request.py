@@ -13,6 +13,7 @@ from apartment_scraper.willhaben.parse import parse_apartment
 
 
 class NoConnectionError(Exception):
+    """No connection to the server could be established."""
     pass
 
 class NoRowsFoundError(Exception):

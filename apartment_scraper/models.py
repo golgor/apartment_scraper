@@ -15,8 +15,9 @@ if TYPE_CHECKING:
 
 
 class Apartment(SQLModel, table=True):
+    """The main model to store apartments in the database."""
     __tablename__ = "apartments"
-    id: int | None = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)  # noqa: A003
     apartment_id: int
     status: bool
     product_id: str
@@ -41,6 +42,7 @@ class Apartment(SQLModel, table=True):
     )
 
 class TransactionResult(NamedTuple):
+    """Named tuple to group the results of a transaction."""
     data: list[Apartment]
     element_count: int
     total_count: int
@@ -101,10 +103,10 @@ class Model:
             list[Apartment]: A list of Apartment objects.
         """
         stmt = select(Apartment).filter(
-            Apartment.post_code >= 1000,
-            Apartment.post_code < 2000,
-            Apartment.rooms >= 3,
-            Apartment.price <= 400_000,
+            Apartment.post_code >= 1000,  # noqa: PLR2004
+            Apartment.post_code < 2000,  # noqa: PLR2004
+            Apartment.rooms >= 3,  # noqa: PLR2004
+            Apartment.price <= 400_000,  # noqa: PLR2004
             Apartment.price > 0,
             Apartment.product_id != "project",
         )
@@ -148,6 +150,7 @@ class Model:
         return apartment
 
     def get_count(self: Self) -> int:
+        """Get the number of apartments in the database."""
         with Session(self.engine) as session:
             return session.query(Apartment).count()
 
