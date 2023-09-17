@@ -5,6 +5,7 @@ from fastapi.responses import PlainTextResponse
 from apartment_scraper import pkg_path, schemas
 from apartment_scraper.models import Apartment, Model
 
+
 app = FastAPI()
 model = Model(path=pkg_path.joinpath("test.db"))
 

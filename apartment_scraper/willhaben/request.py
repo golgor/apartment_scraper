@@ -1,9 +1,11 @@
-from typing import Any, Protocol
-import httpx
-from apartment_scraper import willhaben
 import asyncio
-from time import perf_counter
 import itertools
+from time import perf_counter
+from typing import Any, Protocol
+
+import httpx
+
+from apartment_scraper import willhaben
 from apartment_scraper.models import Apartment
 from apartment_scraper.willhaben.parse import parse_apartment
 
@@ -14,31 +16,31 @@ class NoConnectionError(Exception):
 
 class WillhabenRequest(Protocol):
     @property
-    def url(self) -> str:
+    def url(self) -> str:  # noqa: ANN101
         ...
 
     @property
-    def params(self) -> dict[str, str | int]:
+    def params(self) -> dict[str, str | int]:  # noqa: ANN101
         ...
 
     @property
-    def header(self) -> dict[str, str]:
+    def header(self) -> dict[str, str]:  # noqa: ANN101
         ...
 
     @property
-    def rows(self) -> int:
+    def rows(self) -> int:  # noqa: ANN101
         ...
 
     @property
-    def page(self) -> int:
+    def page(self) -> int:  # noqa: ANN101
         ...
 
     @page.setter
-    def page(self, value: int):
+    def page(self, value: int) -> None:  # noqa: ANN101
         ...
 
     @property
-    def area_id(self) -> int:
+    def area_id(self) -> int:  # noqa: ANN101
         ...
 
 
@@ -48,7 +50,7 @@ async def get_apartments(
     params: dict[str, Any],
     header: dict[str, Any],
 ) -> list[Apartment]:
-    """Async function to get apartments from willhaben.at
+    """Async function to get apartments from willhaben.at.
 
     _extended_summary_
 
@@ -115,5 +117,3 @@ if __name__ == "__main__":
     area = willhaben.AreaId.WIEN.LIESING
     wh = willhaben.MietWohnungen(area_id=area)
     test = asyncio.run(willhaben.get_data(wh))
-    print(test[0].address)
-    print(type(test[0]))

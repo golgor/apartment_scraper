@@ -1,6 +1,7 @@
+import folium
+
 from apartment_scraper import pkg_path, willhaben
 from apartment_scraper.models import Model
-import folium
 
 
 def main() -> None:

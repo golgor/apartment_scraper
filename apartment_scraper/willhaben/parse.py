@@ -6,6 +6,7 @@ from apartment_scraper.models import Apartment
 
 
 class ProductId(Enum):
+    """Enum for the product id of an apartment."""
     UNDEFINED = 0
     PRIVATE_BUY = 100
     PRIVATE_RENTAL = 200
@@ -29,6 +30,14 @@ def get_attribute_with_name(
 
 
 def parse_price_attribute(response: dict[str, Any]) -> float:
+    """Parses the 'PRICE' attribute from a response dictionary and returns it as a float.
+
+    Args:
+        response (dict[str, Any]): The response dictionary to parse.
+
+    Returns:
+        float: The parsed 'PRICE' attribute as a float.
+    """
     try:
         price = get_attribute_with_name(response, "PRICE", 0)[0]
         return float(price)
@@ -38,6 +47,14 @@ def parse_price_attribute(response: dict[str, Any]) -> float:
 
 
 def parse_url_attribute(response: dict[str, Any]) -> str:
+    """Parses the 'SEO_URL' attribute from a response dictionary and returns it as a formatted URL string.
+
+    Args:
+        response (dict[str, Any]): The response dictionary to parse.
+
+    Returns:
+        str: The parsed 'SEO_URL' attribute as a formatted URL string.
+    """
     try:
         if url := get_attribute_with_name(response, "SEO_URL", "")[0]:
             return f"https://www.willhaben.at/iad/{url}"
@@ -53,7 +70,7 @@ def parser_advertiser_attribute(response: dict[str, Any]) -> str:
     try:
         return response["advertiserInfo"]["label"] or ""
     except Exception:
-        print("Failed parse AdvertiserInfo for " f"id={response['id']}")
+        print(f"Failed parse AdvertiserInfo for id={response['id']}")
         return ""
 
 
@@ -62,7 +79,7 @@ def parse_post_code_attribute(response: dict[str, Any]) -> str:
         return get_attribute_with_name(response, "POSTCODE", "")[0]
     except Exception:
         print(
-            "Failed to parse the field 'POSTCODE' for " f"id={response['id']}"
+            f"Failed to parse the field 'POSTCODE' for id={response['id']}"
         )
         return ""
 
@@ -103,7 +120,7 @@ def parse_floor_attribute(response: dict[str, Any]) -> float:
         floor: str = get_attribute_with_name(response, "FLOOR", 0)[0]
         return float(floor)
     except Exception:
-        print("Failed to parse the field 'FLOOR' for " f"id={response['id']}")
+        print(f"Failed to parse the field 'FLOOR' for id={response['id']}")
         return 0
 
 
@@ -114,7 +131,7 @@ def parse_rent_attribute(response: dict[str, Any]) -> float:
         )[0]
         return round(float(rent), 2)
     except Exception:
-        print("Failed to parse the field 'RENT' for " f"id={response['id']}")
+        print(f"Failed to parse the field 'RENT' for id={response['id']}")
         return 0
 
 
@@ -124,7 +141,7 @@ def parse_address_attribute(response: dict[str, Any]) -> str:
         return address
     except Exception:
         print(
-            "Failed to parse the field 'ADDRESS' for " f"id={response['id']}"
+            f"Failed to parse the field 'ADDRESS' for id={response['id']}"
         )
         return ""
 
@@ -137,7 +154,7 @@ def parse_free_area_attribute(response: dict[str, Any]) -> int:
         return int(free_area[0])
     except Exception:
         print(
-            "Failed to parse the field 'FREE_AREA' for " f"id={response['id']}"
+            f"Failed to parse the field 'FREE_AREA' for id={response['id']}"
         )
         return 0
 
@@ -200,7 +217,7 @@ def parse_product_id_attribute(response: dict[str, Any]) -> str:
             0
         ]
         return ProductId(int(product_id)).name.lower()
-    except ValueError as e:
+    except ValueError:
         if local_product_id := locals().get("product_id", None):
             print(
                 f"Failed to convert product_id={local_product_id} to ProductId enum"
@@ -208,7 +225,7 @@ def parse_product_id_attribute(response: dict[str, Any]) -> str:
             return str(local_product_id)
         else:
             return ""
-    except Exception as e:
+    except Exception:
         print(
             "Failed to parse the field 'PRODUCT_ID' for "
             f"id={response['id']}"
@@ -221,9 +238,7 @@ def parse_location_attribute(response: dict[str, Any]) -> str:
         location: str = get_attribute_with_name(response, "LOCATION", "")[0]
         return location
     except Exception:
-        print(
-            "Failed to parse the field 'LOCATION' for " f"id={response['id']}"
-        )
+        print(f"Failed to parse the field 'LOCATION' for id={response['id']}")
         return ""
 
 

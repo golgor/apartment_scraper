@@ -2,7 +2,7 @@ from typing import Any
 
 
 class FieldParser:
-    def __init__(self, response: dict[str, Any]):
+    def __init__(self, response: dict[str, Any]) -> None:
         self.response = response
 
     @property

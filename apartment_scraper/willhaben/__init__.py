@@ -4,6 +4,7 @@ from apartment_scraper.willhaben.parse import parse_willhaben_response
 from apartment_scraper.willhaben.request import get_data
 from apartment_scraper.willhaben.wohnungen import KaufWohnungen, MietWohnungen
 
+
 __all__ = [
     "KaufWohnungen",
     "MietWohnungen",

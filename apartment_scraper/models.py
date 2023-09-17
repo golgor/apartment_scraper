@@ -1,6 +1,6 @@
 import csv
 import pathlib
-from typing import Any, NamedTuple, Optional
+from typing import Any, NamedTuple
 
 from sqlalchemy import (
     Column,
@@ -40,14 +40,14 @@ class Apartment(Base):
     address: Mapped[str]
     post_code: Mapped[str]
     location: Mapped[str]
-    coordinates: Mapped[Optional[str]]
-    price: Mapped[Optional[float]]
-    price_per_area: Mapped[Optional[float]]
+    coordinates: Mapped[str | None]
+    price: Mapped[float | None]
+    price_per_area: Mapped[float | None]
     free_area_type = Column(JSON, nullable=True)
     free_area = Column(JSON, nullable=True)
     image_urls = Column(JSON, nullable=True)
     advertiser: Mapped[str]
-    prio: Mapped[Optional[int]]
+    prio: Mapped[int | None]
     created = Column(DateTime(timezone=True), server_default=func.now())
     updated = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -55,7 +55,7 @@ class Apartment(Base):
 class Model:
     def __init__(self, path: pathlib.Path) -> None:
         self.engine = create_engine(
-            f"sqlite:///{str(path)}",
+            f"sqlite:///{path!s}",
             echo=False,
             connect_args={"check_same_thread": False},
         )
@@ -86,8 +86,7 @@ class Model:
             Apartment.product_id != "project",
         )
         with Session(self.engine) as session:
-            results = list(session.scalars(stmt))
-        return results
+            return list(session.scalars(stmt))
 
     def get_paged_apartments(
         self, page: int, pagesize: int
@@ -134,40 +133,39 @@ class Model:
         return result
 
     def dump_to_csv(self, filename: str) -> None:
-        with Session(self.engine) as session:
-            with open("dump.csv", "w") as f:
-                out = csv.writer(f)
+        with Session(self.engine) as session, open("dump.csv", "w") as f:
+            out = csv.writer(f)
+            out.writerow(
+                [
+                    "apartment_id",
+                    "area",
+                    "price",
+                    "url",
+                    "rooms",
+                    "floor",
+                    "address",
+                    "post_code",
+                    "price_per_area",
+                    "coordinates",
+                    "free_area_type",
+                    "free_area",
+                ]
+            )
+
+            for item in session.query(Apartment).all():
                 out.writerow(
                     [
-                        "apartment_id",
-                        "area",
-                        "price",
-                        "url",
-                        "rooms",
-                        "floor",
-                        "address",
-                        "post_code",
-                        "price_per_area",
-                        "coordinates",
-                        "free_area_type",
-                        "free_area",
+                        item.apartment_id,
+                        item.area,
+                        item.price,
+                        item.url,
+                        item.rooms,
+                        item.floor,
+                        item.address,
+                        item.post_code,
+                        item.price_per_area,
+                        item.coordinates,
+                        item.free_area_type,
+                        item.free_area,
                     ]
                 )
-
-                for item in session.query(Apartment).all():
-                    out.writerow(
-                        [
-                            item.apartment_id,
-                            item.area,
-                            item.price,
-                            item.url,
-                            item.rooms,
-                            item.floor,
-                            item.address,
-                            item.post_code,
-                            item.price_per_area,
-                            item.coordinates,
-                            item.free_area_type,
-                            item.free_area,
-                        ]
-                    )

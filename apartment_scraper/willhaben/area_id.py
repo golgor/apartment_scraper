@@ -25,7 +25,7 @@ class _Wien(Enum):
     BRIGITTENAU = 117242
     FLORIDSDORF = 117243
     DONAUSTADT = 117244
-    LIESING = 117245
+    LIESING = "wien/wien-1230-liesing"
 
 
 class _Niederösterreich(Enum):

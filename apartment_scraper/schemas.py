@@ -1,5 +1,4 @@
 import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -16,15 +15,15 @@ class ApartmentSchema(BaseModel):
     address: str
     post_code: str
     location: str
-    coordinates: Optional[str]
-    price: Optional[float]
-    price_per_area: Optional[float]
-    free_area_type: Optional[list[str]]
-    free_area: Optional[int]
-    image_urls: Optional[list[str]]
+    coordinates: str | None
+    price: float | None
+    price_per_area: float | None
+    free_area_type: list[str] | None
+    free_area: int | None
+    image_urls: list[str] | None
     advertiser: str
-    prio: Optional[int]
-    updated: Optional[datetime.datetime]
+    prio: int | None
+    updated: datetime.datetime | None
     created: datetime.datetime
 
     class Config:
