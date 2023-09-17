@@ -1,6 +1,6 @@
 import pathlib
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, NamedTuple, Self
+from typing import TYPE_CHECKING, NamedTuple, Self
 from zoneinfo import ZoneInfo
 
 from loguru import logger
@@ -12,11 +12,6 @@ from apartment_scraper import pkg_path
 if TYPE_CHECKING:
     from sqlalchemy.future.engine import Engine
 
-
-class TransactionResult(NamedTuple):
-    data: Any
-    element_count: int
-    total_count: int
 
 
 class Apartment(SQLModel, table=True):
@@ -44,6 +39,11 @@ class Apartment(SQLModel, table=True):
     updated: datetime | None = Field(
         default=datetime.now(tz=ZoneInfo("UTC"))
     )
+
+class TransactionResult(NamedTuple):
+    data: list[Apartment]
+    element_count: int
+    total_count: int
 
 
 class Model:
@@ -127,11 +127,9 @@ class Model:
         """
         stmt = select(Apartment).where(Apartment.id > page * pagesize).limit(pagesize)
 
-        my_table = table("apartments", column("id"))
-        count = select(func.count()).select_from(my_table)
         with Session(self.engine) as session:
-            total_count = session.execute(count).scalar()
-            results = list(session.scalars(stmt))
+            total_count = session.query(Apartment).count()
+            results: list[Apartment] = list(session.scalars(stmt))
         return TransactionResult(results, len(results), total_count or 0)
 
     def get_apartment_by_id(self: Self, apartment_id: int) -> Apartment | None:
