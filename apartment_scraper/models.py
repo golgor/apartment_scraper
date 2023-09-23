@@ -1,9 +1,10 @@
-import pathlib
+import os
 from datetime import datetime
 from typing import TYPE_CHECKING, NamedTuple, Self
 from zoneinfo import ZoneInfo
 
 from loguru import logger
+from sqlalchemy.engine import URL
 from sqlmodel import Field, Session, SQLModel, create_engine, select, update
 
 from apartment_scraper import pkg_path
@@ -12,8 +13,6 @@ from apartment_scraper import pkg_path
 if TYPE_CHECKING:
     from sqlalchemy.engine.cursor import CursorResult
     from sqlalchemy.future.engine import Engine
-
-
 
 class Apartment(SQLModel, table=True):
     """The main model to store apartments in the database."""
@@ -51,19 +50,20 @@ class TransactionResult(NamedTuple):
 
 class Model:
     """A class to manage the database."""
-    def __init__(self: Self, path: pathlib.Path) -> None:
+    def __init__(self: Self) -> None:
         """Initialize the database.
 
         Creates an engine and the database if it does not exist.
-
-        Args:
-            self (Self): _description_
-            path (pathlib.Path): _description_
         """
-        self.engine = create_engine(f"sqlite:///{path}", echo=False)
-        if not path.exists():
-            logger.info("Creating database!")
-            SQLModel.metadata.create_all(self.engine)
+        url_object = URL.create(
+            "postgresql",
+            username=from_env("USERNAME"),
+            password=from_env("PASSWORD"),
+            host=from_env("HOST"),
+            database=from_env("DATABASE"),
+        )
+        self.engine = create_engine(url_object)
+        SQLModel.metadata.create_all(self.engine)
 
     def get_engine(self: Self) -> "Engine":
         """Get the engine.
@@ -179,6 +179,25 @@ class Model:
         return bool(row_count)
 
 
+def from_env(name: str) -> str:
+    """Get an environment variable.
+
+    Args:
+        name (str): The name of the environment variable.
+
+    Raises:
+        KeyError: If the environment variable does not exist.
+
+    Returns:
+        str: The value of the environment variable.
+    """
+    try:
+        return os.environ[name]
+    except KeyError as e:
+        logger.error(f"Environment variable {name} does not exist.")
+        raise KeyError() from e
+
+
 if __name__ == "__main__":
     apartment = Apartment(
         apartment_id=1,
@@ -222,5 +241,5 @@ if __name__ == "__main__":
         advertiser="test",
         prio=1,
     )
-    model = Model(path=pkg_path.joinpath("test.db"))
+    model = Model()
     model.add_apartments([apartment, apartment2])
