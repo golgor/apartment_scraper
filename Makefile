@@ -30,13 +30,13 @@ ruff: ci
 	${RUN} ruff check .
 
 run_docker: ci
-	docker compose up --build --attach web
+	docker compose --profile web up --build --attach web
 
 docker_up:
-	docker compose up --build -d
+	docker compose --profile db up --build -d
 
 docker_down:
-	docker compose down
+	docker compose --profile web up down
 
 docker_build:
 	docker build -t apartment-scraper .

@@ -5,7 +5,7 @@ from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import PlainTextResponse
 from loguru import logger
 
-from apartment_scraper import pkg_path, schemas
+from apartment_scraper import schemas
 from apartment_scraper.models import Apartment, Model
 
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 MAX_PAGE_SIZE = 500  # max number of apartments to return per page
 
 app = FastAPI()
-model = Model(path=pkg_path.joinpath("test.db"))
+model = Model()
 
 
 @app.exception_handler(ResponseValidationError)

@@ -1,14 +1,18 @@
 import asyncio
 
 import folium
+from dotenv import load_dotenv
 
 from apartment_scraper import pkg_path, willhaben
 from apartment_scraper.models import Model
 
 
+# Loads the environment variables from .env file
+load_dotenv()
+
 def main() -> None:
     """Main function of the application."""
-    model = Model(path=pkg_path.joinpath("test.db"))
+    model = Model()
     areas = [willhaben.AreaId.WIEN.ALL]
 
     for area in areas:
@@ -107,5 +111,5 @@ def create_map() -> None:
 
 
 if __name__ == "__main__":
-    # map()
-    main()
+    create_map()
+    # main()
