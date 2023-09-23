@@ -22,6 +22,17 @@ def main() -> None:
 
 
 def get_color(price_per_area: int) -> str:
+    """Determines the color category based on the price per area.
+
+    Args:
+        price_per_area (int): The price per area of the apartment.
+
+    Returns:
+        str: The color category of the apartment. Possible values are "green", "yellow", "orange", or "red".
+
+    Raises:
+        None
+    """
     cheap = 2_000
     average = 3_500
     expensive = 5_000
@@ -37,6 +48,14 @@ def get_color(price_per_area: int) -> str:
 
 
 def get_free_area(free_area: int) -> str:
+    """Get a color based on the free area (garden etc.) of the apartment.
+
+    Args:
+        free_area (int): An integer representing the size of the free area.
+
+    Returns:
+        str: Returns a string with the name of a color.
+    """
     no_area = 0
     small_area = 50
     big_area = 200
@@ -51,7 +70,18 @@ def get_free_area(free_area: int) -> str:
         return "green"
 
 
-def get_rooms_color(rooms: int) -> str:
+def get_rooms_color(rooms: float) -> str:
+    """Determines the color category based on the number of rooms.
+
+    Args:
+        rooms (int): The number of rooms in the apartment.
+
+    Returns:
+        str: The color category of the apartment. Possible values are "red", "orange", "yellow", or "green".
+
+    Raises:
+        None
+    """
     small_apartment = 3
     average_apartment = 4
     big_apartment = 5
@@ -66,7 +96,24 @@ def get_rooms_color(rooms: int) -> str:
         return "green"
 
 
-def get_price_color(price: int) -> str:
+def get_price_color(price: float) -> str:
+    """Determines the color category based on the price of the apartment.
+
+    Args:
+        price (int): The price of the apartment.
+
+    Returns:
+        str: The color category of the apartment. Possible values are "green", "yellow", "orange", or "red".
+
+    Raises:
+        None
+
+    Examples:
+        ```python
+        color = get_price_color(300000)
+        print(color)  # Output: "yellow"
+        ```
+    """
     cheap_apartment = 250_000
     average_apartment = 300_000
     expensive_apartment = 350_000
@@ -87,7 +134,7 @@ def create_map() -> None:
 
     folium.GeoJson("bezirke_95_geo.json").add_to(base_map)
 
-    model = Model(path=pkg_path.joinpath("test.db"))
+    model = Model()
     apartments = model.get_map_data()
 
     for apartment in apartments:

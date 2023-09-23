@@ -41,6 +41,16 @@ async def validation_exception_handler(request: "Request", exc: ResponseValidati
 
 @app.get("/", response_model=dict[str, str])
 def read_root() -> dict[str, str]:
+    """Returns a dictionary with a single key-value pair.
+
+    Typically only used to test connectivity.
+
+    Returns:
+        dict[str, str]: A dictionary with a single key "Hello" and value "World".
+
+    Raises:
+        None
+    """
     return {"Hello": "World"}
 
 
@@ -84,6 +94,17 @@ def query_all_apartments(
     response_model=schemas.ApartmentSchema,
 )
 def query_apartment_by_id(apartment_id: int) -> Apartment:
+    """Retrieves an apartment by its ID.
+
+    Args:
+        apartment_id (int): The ID of the apartment.
+
+    Returns:
+        Apartment: The apartment object.
+
+    Raises:
+        HTTPException: Raised when the apartment with the given ID is not found.
+    """
     apartment = model.get_apartment_by_id(apartment_id)
     if apartment is None:
         raise HTTPException(

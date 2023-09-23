@@ -241,5 +241,5 @@ if __name__ == "__main__":
         advertiser="test",
         prio=1,
     )
-    model = Model(path=pkg_path.joinpath("test.db"))
+    model = Model()
     model.add_apartments([apartment, apartment2])
