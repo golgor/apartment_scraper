@@ -2,7 +2,7 @@ import asyncio
 
 import folium
 
-from apartment_scraper import pkg_path, willhaben
+from apartment_scraper import willhaben
 from apartment_scraper.models import Model
 
 

@@ -60,7 +60,7 @@ def read_root() -> dict[str, str]:
     "/apartments/",
     response_model=dict[str, int | list[schemas.ApartmentSchema]],
 )
-def query_all_apartments(
+def query_all_apartments( # noqa: PLR0913
     pagesize: int = 100,
     page: int = 0,
     min_area: int = 0,
@@ -76,6 +76,11 @@ def query_all_apartments(
     Args:
         pagesize (int, optional): The page size. Defaults to 100.
         page (int, optional): What page to return. Defaults to 0.
+        min_area (int, optional): _description_. Defaults to 0.
+        min_room (int, optional): _description_. Defaults to 0.
+        max_price (int, optional): _description_. Defaults to 0.
+        min_price (int, optional): _description_. Defaults to 0.
+        exclude_property_types (str | None, optional): _description_. Defaults to None.
 
     Raises:
         HTTPException: In case of demanding a page size greater than 500.
@@ -151,4 +156,4 @@ def update_prio_of_apartment(
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # noqa: S104 - This is the main entrypoint only for development.

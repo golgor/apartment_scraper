@@ -118,7 +118,7 @@ class Model:
         with Session(self.engine) as session:
             return list(session.scalars(stmt))
 
-    def get_paged_apartments(
+    def get_paged_apartments( # noqa: PLR0913
         self: Self,
         page: int,
         pagesize: int,
@@ -134,9 +134,13 @@ class Model:
         dumping the whole database in one query.
 
         Args:
-            self (Self): _description_
             page (int): _description_
             pagesize (int): _description_
+            min_area (int, optional): _description_. Defaults to 0.
+            min_room (int, optional): _description_. Defaults to 0.
+            max_price (int, optional): _description_. Defaults to 0.
+            min_price (int, optional): _description_. Defaults to 0.
+            exclude_property_types (list[str] | None, optional): _description_. Defaults to None.
 
         Returns:
             TransactionResult: _description_
@@ -153,11 +157,13 @@ class Model:
         if exclude_property_types:
             filters.append(Apartment.property_type.not_in(exclude_property_types))
 
-        # Likely have to order by id? And somehow get the id of the last element in the previous page.
+        # TODO: Likely have to order by id? And somehow get the id of the last element in the previous page.
 
         stmt = (
             select(Apartment)
-            .where(Apartment.id > page * pagesize)  # Broken now, as with the filters the IDs are not in order and sequential
+            .where(
+                Apartment.id > page * pagesize
+            )  # Broken now, as with the filters the IDs are not in order and sequential
             .limit(pagesize)
             .filter(*filters)
         )
