@@ -126,3 +126,9 @@ def update_prio_of_apartment(
             status_code=404, detail=f"Apartment {apartment_id} not found"
         )
     return Response(status_code=204)
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
