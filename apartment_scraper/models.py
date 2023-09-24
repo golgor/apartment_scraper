@@ -119,7 +119,14 @@ class Model:
             return list(session.scalars(stmt))
 
     def get_paged_apartments(
-        self: Self, page: int, pagesize: int, min_area: int = 0, min_room: int = 0, max_price: int = 0, min_price: int = 0
+        self: Self,
+        page: int,
+        pagesize: int,
+        min_area: int = 0,
+        min_room: int = 0,
+        max_price: int = 0,
+        min_price: int = 0,
+        exclude_property_types: list[str] | None = None,
     ) -> TransactionResult:
         """Get a page of apartments.
 
@@ -143,17 +150,18 @@ class Model:
             filters.append(Apartment.price < max_price)
         if min_price:
             filters.append(Apartment.price > min_price)
+        if exclude_property_types:
+            filters.append(Apartment.property_type.not_in(exclude_property_types))
+
+        # Likely have to order by id? And somehow get the id of the last element in the previous page.
 
         stmt = (
             select(Apartment)
-            .where(Apartment.id > page * pagesize)
+            .where(Apartment.id > page * pagesize)  # Broken now, as with the filters the IDs are not in order and sequential
             .limit(pagesize)
             .filter(*filters)
         )
-        stmt2 = (
-            select(Apartment.id)
-            .filter(*filters)
-        )
+        stmt2 = select(Apartment.id).filter(*filters)
 
         with Session(self.engine) as session:
             count = len(list(session.scalars(stmt2)))
