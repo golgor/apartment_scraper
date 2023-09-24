@@ -19,7 +19,9 @@ model = Model()
 
 
 @app.exception_handler(ResponseValidationError)
-async def validation_exception_handler(request: "Request", exc: ResponseValidationError) -> PlainTextResponse:
+async def validation_exception_handler(
+    request: "Request", exc: ResponseValidationError
+) -> PlainTextResponse:
     """Function to response to validation errors.
 
     This is primarily used to log the errors during development. It returns a plain text what the problem is, instead
@@ -58,8 +60,14 @@ def read_root() -> dict[str, str]:
     "/apartments/",
     response_model=dict[str, int | list[schemas.ApartmentSchema]],
 )
-def query_all_apartments(
-    pagesize: int = 100, page: int = 0
+def query_all_apartments( # noqa: PLR0913
+    pagesize: int = 100,
+    page: int = 0,
+    min_area: int = 0,
+    min_room: int = 0,
+    max_price: int = 0,
+    min_price: int = 0,
+    exclude_property_types: str | None = None,
 ) -> dict[str, int | list[Apartment]]:
     """Endpoint to get all apartments from the database.
 
@@ -68,6 +76,11 @@ def query_all_apartments(
     Args:
         pagesize (int, optional): The page size. Defaults to 100.
         page (int, optional): What page to return. Defaults to 0.
+        min_area (int, optional): _description_. Defaults to 0.
+        min_room (int, optional): _description_. Defaults to 0.
+        max_price (int, optional): _description_. Defaults to 0.
+        min_price (int, optional): _description_. Defaults to 0.
+        exclude_property_types (str | None, optional): _description_. Defaults to None.
 
     Raises:
         HTTPException: In case of demanding a page size greater than 500.
@@ -79,7 +92,21 @@ def query_all_apartments(
         raise HTTPException(
             status_code=413, detail="Pagesize cannot be greater than 500"
         )
-    data, elements, count = model.get_paged_apartments(page=page, pagesize=pagesize)
+    if exclude_property_types is not None:
+        exclude_property_types = exclude_property_types.replace(" ", "")
+        exclude_property_types_parsed = list(exclude_property_types.split(","))
+    else:
+        exclude_property_types_parsed = None
+
+    data, elements, count = model.get_paged_apartments(
+        page=page,
+        pagesize=pagesize,
+        min_area=min_area,
+        min_room=min_room,
+        max_price=max_price,
+        min_price=min_price,
+        exclude_property_types=exclude_property_types_parsed,
+    )
     return {
         "pagesize": pagesize,
         "page": page,
@@ -113,9 +140,7 @@ def query_apartment_by_id(apartment_id: int) -> Apartment:
     return apartment
 
 
-@app.put(
-    "/apartments/{apartment_id}"
-)
+@app.put("/apartments/{apartment_id}")
 def update_prio_of_apartment(
     apartment_id: int,
     prio: int,
@@ -126,3 +151,9 @@ def update_prio_of_apartment(
             status_code=404, detail=f"Apartment {apartment_id} not found"
         )
     return Response(status_code=204)
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)  # noqa: S104 - This is the main entrypoint only for development.

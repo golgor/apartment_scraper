@@ -14,7 +14,9 @@ from apartment_scraper.willhaben.parse import parse_apartment
 
 class NoConnectionError(Exception):
     """No connection to the server could be established."""
+
     pass
+
 
 class NoRowsFoundError(Exception):
     """No rows found for the current endpoint. This means that there is no data to be parsed."""
