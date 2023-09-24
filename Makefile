@@ -36,7 +36,7 @@ docker_up:
 	docker compose --profile db up --build -d
 
 docker_down:
-	docker compose --profile web up down
+	docker compose --profile web down
 
 docker_build:
 	docker build -t apartment-scraper .
