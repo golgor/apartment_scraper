@@ -19,7 +19,9 @@ model = Model()
 
 
 @app.exception_handler(ResponseValidationError)
-async def validation_exception_handler(request: "Request", exc: ResponseValidationError) -> PlainTextResponse:
+async def validation_exception_handler(
+    request: "Request", exc: ResponseValidationError
+) -> PlainTextResponse:
     """Function to response to validation errors.
 
     This is primarily used to log the errors during development. It returns a plain text what the problem is, instead
@@ -113,9 +115,7 @@ def query_apartment_by_id(apartment_id: int) -> Apartment:
     return apartment
 
 
-@app.put(
-    "/apartments/{apartment_id}"
-)
+@app.put("/apartments/{apartment_id}")
 def update_prio_of_apartment(
     apartment_id: int,
     prio: int,

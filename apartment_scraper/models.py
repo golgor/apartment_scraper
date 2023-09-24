@@ -3,19 +3,22 @@ from datetime import datetime
 from typing import TYPE_CHECKING, NamedTuple, Self
 from zoneinfo import ZoneInfo
 
+from dotenv import load_dotenv
 from loguru import logger
 from sqlalchemy.engine import URL
 from sqlmodel import Field, Session, SQLModel, create_engine, select, update
 
-from apartment_scraper import pkg_path
 
+load_dotenv()
 
 if TYPE_CHECKING:
     from sqlalchemy.engine.cursor import CursorResult
     from sqlalchemy.future.engine import Engine
 
+
 class Apartment(SQLModel, table=True):
     """The main model to store apartments in the database."""
+
     __tablename__ = "apartments"
     id: int | None = Field(default=None, primary_key=True)  # noqa: A003
     apartment_id: int
@@ -37,12 +40,12 @@ class Apartment(SQLModel, table=True):
     image_urls: str | None
     advertiser: str
     prio: int = 0
-    updated: datetime | None = Field(
-        default=datetime.now(tz=ZoneInfo("UTC"))
-    )
+    updated: datetime | None = Field(default=datetime.now(tz=ZoneInfo("UTC")))
+
 
 class TransactionResult(NamedTuple):
     """Named tuple to group the results of a transaction."""
+
     data: list[Apartment]
     element_count: int
     total_count: int
@@ -50,6 +53,7 @@ class TransactionResult(NamedTuple):
 
 class Model:
     """A class to manage the database."""
+
     def __init__(self: Self) -> None:
         """Initialize the database.
 
