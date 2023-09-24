@@ -61,7 +61,7 @@ def read_root() -> dict[str, str]:
     response_model=dict[str, int | list[schemas.ApartmentSchema]],
 )
 def query_all_apartments(
-    pagesize: int = 100, page: int = 0
+    pagesize: int = 100, page: int = 0, min_area: int = 0, min_room: int = 0, max_price: int = 0, min_price: int = 0
 ) -> dict[str, int | list[Apartment]]:
     """Endpoint to get all apartments from the database.
 
@@ -81,7 +81,9 @@ def query_all_apartments(
         raise HTTPException(
             status_code=413, detail="Pagesize cannot be greater than 500"
         )
-    data, elements, count = model.get_paged_apartments(page=page, pagesize=pagesize)
+    data, elements, count = model.get_paged_apartments(
+        page=page, pagesize=pagesize, min_area=min_area, min_room=min_room, max_price=max_price, min_price=min_price
+    )
     return {
         "pagesize": pagesize,
         "page": page,

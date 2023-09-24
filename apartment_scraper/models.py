@@ -118,7 +118,9 @@ class Model:
         with Session(self.engine) as session:
             return list(session.scalars(stmt))
 
-    def get_paged_apartments(self: Self, page: int, pagesize: int) -> TransactionResult:
+    def get_paged_apartments(
+        self: Self, page: int, pagesize: int, min_area: int = 0, min_room: int = 0, max_price: int = 0, min_price: int = 0
+    ) -> TransactionResult:
         """Get a page of apartments.
 
         This is used to get a "page" of apartments from the database. This is used to paginate the database and to avoid
@@ -132,12 +134,31 @@ class Model:
         Returns:
             TransactionResult: _description_
         """
-        stmt = select(Apartment).where(Apartment.id > page * pagesize).limit(pagesize)
+        filters = []
+        if min_area:
+            filters.append(Apartment.area >= min_area)
+        if min_room:
+            filters.append(Apartment.rooms >= min_room)
+        if max_price:
+            filters.append(Apartment.price < max_price)
+        if min_price:
+            filters.append(Apartment.price > min_price)
+
+        stmt = (
+            select(Apartment)
+            .where(Apartment.id > page * pagesize)
+            .limit(pagesize)
+            .filter(*filters)
+        )
+        stmt2 = (
+            select(Apartment.id)
+            .filter(*filters)
+        )
 
         with Session(self.engine) as session:
-            total_count = session.query(Apartment).count()
+            count = len(list(session.scalars(stmt2)))
             results: list[Apartment] = list(session.scalars(stmt))
-        return TransactionResult(results, len(results), total_count or 0)
+        return TransactionResult(results, len(results), count or 0)
 
     def get_apartment_by_id(self: Self, apartment_id: int) -> Apartment | None:
         """Get details about a single apartment.
