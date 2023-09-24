@@ -12,6 +12,9 @@ services:
       - DATABASE=apartments
     depends_on:
       - database
+    labels:
+      kompose.service.type: LoadBalancer
+    # To use kompose convert, the profiles needs to commented out, otherwise it won't work
     profiles: ["web"]
 
   database:
@@ -24,6 +27,7 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     ports:
       - "5432:5432"
+    # To use kompose convert, the profiles needs to commented out, otherwise it won't work
     profiles: ["db", "web"]
 volumes:
   postgres_data:
