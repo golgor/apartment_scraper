@@ -43,11 +43,32 @@ async def get_rental_apartments(body: ImmoweltRentalApartmentRequestBody) -> lis
 class LocationIds(IntEnum):
     """A enumeration for the different locations in the immowelt api."""
 
-    WIEN = 514061
+    WIEN_STADT = 514061
+    WIEN_STATE = 513966
+    ÖSTERREICH = 513957
     MEIDLING = 516384
     LIESING = 516394
-    PENZING = 514061
+    PENZING = 516386
     ALSERGRUND = 516381
+    BRIGITTENAU = 516391
+    OTTAKRING = 516388
+    RUDOLFSHEIM = 516387
+    SIMMERING = 516383
+    WIEDEN = 516375
+    WÄHRING = 516390
+    NEUBAU = 516379
+    MARIAHILF = 516378
+    MARGARETEN = 516377
+    LEOPOLDSTADT = 516188
+    LANDSTRASSE = 516374
+    JOSEFSTADT = 516380
+    INNERE_STADT = 516367
+    HIETZING = 516385
+    HERNALS = 516389
+    FLORIDSDORF = 516392
+    FAVORITEN = 516382
+    DÖBLING = 516189
+    DONAUSTADT = 516393
 
 
 if __name__ == "__main__":
