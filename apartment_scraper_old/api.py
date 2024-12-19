@@ -8,6 +8,7 @@ from loguru import logger
 from apartment_scraper_old import schemas
 from apartment_scraper_old.models import Apartment, Model
 
+
 if TYPE_CHECKING:
     from starlette.requests import Request
 

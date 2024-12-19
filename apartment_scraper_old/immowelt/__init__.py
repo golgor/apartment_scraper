@@ -7,7 +7,8 @@ from loguru import logger
 # from apartment_scraper.immowelt.parse import parse_immowelt_response
 from apartment_scraper_old.immowelt.request import WohnungenWien
 
-__all__ = ["get_immowelt_token", "WohnungenWien"]
+
+__all__ = ["WohnungenWien", "get_immowelt_token"]
 
 
 class NoConnectionError(Exception):

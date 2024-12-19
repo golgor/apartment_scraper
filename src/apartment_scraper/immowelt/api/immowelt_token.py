@@ -1,7 +1,8 @@
 import os
+from collections.abc import Callable
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Any, Callable
+from typing import Any
 
 import httpx
 from dotenv import set_key

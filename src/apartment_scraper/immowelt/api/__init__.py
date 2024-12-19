@@ -8,6 +8,7 @@ from result import as_async_result
 from apartment_scraper.immowelt.api.exceptions import NoTokenFoundError
 from apartment_scraper.immowelt.api.immowelt_token import get_token
 
+
 load_dotenv()
 
 

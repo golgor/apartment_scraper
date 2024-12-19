@@ -323,8 +323,7 @@ def parse_image_urls_attribute(response: dict[str, Any]) -> str:
             return json.dumps(
                 [f"https://cache.willhaben.at/mmo/{url}" for url in urls.split(";")]
             )
-        else:
-            return json.dumps([])
+        return json.dumps([])
     except Exception:
         logger.warning(
             f"Failed to parse the field 'ALL_IMAGE_URLS' for id={response['id']}"
@@ -375,8 +374,7 @@ def parse_product_id_attribute(response: dict[str, Any]) -> str:
                 f"Failed to convert product_id={local_product_id} to ProductId enum"
             )
             return str(local_product_id)
-        else:
-            return ""
+        return ""
     except Exception:
         logger.warning(
             f"Failed to parse the field 'PRODUCT_ID' for id={response['id']}"
