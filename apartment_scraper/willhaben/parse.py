@@ -320,7 +320,9 @@ def parse_image_urls_attribute(response: dict[str, Any]) -> str:
     try:
         urls: str = get_attribute_with_name(response, "ALL_IMAGE_URLS")[0]
         if urls:
-            return json.dumps([f"https://cache.willhaben.at/mmo/{url}" for url in urls.split(";")])
+            return json.dumps(
+                [f"https://cache.willhaben.at/mmo/{url}" for url in urls.split(";")]
+            )
         else:
             return json.dumps([])
     except Exception:

@@ -33,7 +33,7 @@ run_docker: ci
 	docker compose --profile web up --build --attach web
 
 docker_up:
-	docker compose --profile db up --build -d
+	docker compose --profile db up
 
 docker_down:
 	docker compose --profile web down

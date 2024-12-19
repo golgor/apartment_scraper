@@ -58,6 +58,7 @@ class _Niederösterreich(Enum):
 
 class AreaId:
     """AreaId to wrap the area enumerators of different states."""
+
     WIEN = _Wien
     NIEDERÖSTERREICH = _Niederösterreich
     BURGENLAND = 1

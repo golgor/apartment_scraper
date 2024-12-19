@@ -4,6 +4,7 @@ from typing import Self
 
 class WohnungenWien:
     """Apartments class."""
+
     def __init__(self: Self, bearer_token: str, page: int = 0, rows: int = 500) -> None:
         """Initialize class."""
         self.bearer_token = bearer_token
