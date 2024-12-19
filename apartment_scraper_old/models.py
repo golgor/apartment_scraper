@@ -20,7 +20,7 @@ class Apartment(SQLModel, table=True):
     """The main model to store apartments in the database."""
 
     __tablename__ = "apartments"
-    id: int | None = Field(default=None, primary_key=True)  # noqa: A003
+    id: int | None = Field(default=None, primary_key=True)
     apartment_id: int
     status: bool
     product_id: str
@@ -211,7 +211,7 @@ class Model:
         )
 
         with Session(self.engine) as session:
-            result: "CursorResult" = session.execute(stmt)
+            result: CursorResult = session.execute(stmt)
             row_count: int = result.rowcount
             session.commit()
 

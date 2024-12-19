@@ -1,6 +1,8 @@
 import json
 from typing import Self
 
+from apartment_scraper_old.immowelt.types import DistributionTypes, EstateType
+
 
 class WohnungenWien:
     """Apartments class."""
@@ -43,8 +45,8 @@ class WohnungenWien:
         """The body of the request."""
         return json.dumps(
             {
-                "estateType": "APARTMENT",
-                "distributionTypes": ["SALE"],
+                "estateType": EstateType.apartment,
+                "distributionTypes": [DistributionTypes.sale],
                 "estateSubtypes": [],
                 "locationIds": [514061],
                 "featureFilters": [],
@@ -55,7 +57,7 @@ class WohnungenWien:
                 "rooms": {"min": None, "max": None},
                 "constructionYear": {"min": None, "max": None},
                 "geoRadius": {
-                    "radius": None,
+                    "radius": 3000,
                     "point": {
                         "lat": 48.22029015850006,
                         "lon": 16.371278701731626,

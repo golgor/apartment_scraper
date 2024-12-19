@@ -8,8 +8,8 @@ from typing import Any, Self
 import httpx
 from loguru import logger
 
-from apartment_scraper.models import Apartment
-from apartment_scraper.willhaben.parse import parse_apartment
+from apartment_scraper_old.models import Apartment
+from apartment_scraper_old.willhaben.parse import parse_apartment
 
 
 class NoConnectionError(Exception):

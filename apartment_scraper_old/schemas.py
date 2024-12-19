@@ -6,7 +6,7 @@ from pydantic import BaseModel
 class ApartmentSchema(BaseModel):
     """Schema for the Apartment model."""
 
-    id: int  # noqa: A003
+    id: int
     apartment_id: int
     status: bool
     product_id: str

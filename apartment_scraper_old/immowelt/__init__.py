@@ -5,10 +5,10 @@ import httpx
 from loguru import logger
 
 # from apartment_scraper.immowelt.parse import parse_immowelt_response
-from apartment_scraper.immowelt.request import WohnungenWien
+from apartment_scraper_old.immowelt.request import WohnungenWien
 
 
-__all__ = ["get_immowelt_token", "WohnungenWien"]
+__all__ = ["WohnungenWien", "get_immowelt_token"]
 
 
 class NoConnectionError(Exception):
@@ -17,24 +17,19 @@ class NoConnectionError(Exception):
 
 class ImmoweltRequest(Protocol):
     @property
-    def url(self: Self) -> str:
-        ...
+    def url(self: Self) -> str: ...
 
     @property
-    def header(self: Self) -> dict[str, str]:
-        ...
+    def header(self: Self) -> dict[str, str]: ...
 
     @property
-    def body(self: Self) -> dict[str, str | int] | str:
-        ...
+    def body(self: Self) -> dict[str, str | int] | str: ...
 
     @property
-    def page(self: Self) -> int:
-        ...
+    def page(self: Self) -> int: ...
 
     @page.setter
-    def page(self: Self, value: int) -> None:
-        ...
+    def page(self: Self, value: int) -> None: ...
 
 
 class ImmoweltTokenRequest:

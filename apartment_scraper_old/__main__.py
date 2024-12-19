@@ -2,8 +2,8 @@ import asyncio
 
 import folium
 
-from apartment_scraper import willhaben
-from apartment_scraper.models import Model
+from apartment_scraper_old import willhaben
+from apartment_scraper_old.models import Model
 
 
 def main() -> None:
@@ -35,12 +35,11 @@ def get_color(price_per_area: int) -> str:
 
     if price_per_area < cheap:
         return "green"
-    elif price_per_area < average:
+    if price_per_area < average:
         return "yellow"
-    elif price_per_area < expensive:
+    if price_per_area < expensive:
         return "orange"
-    else:
-        return "red"
+    return "red"
 
 
 def get_free_area(free_area: int) -> str:
@@ -58,12 +57,11 @@ def get_free_area(free_area: int) -> str:
 
     if free_area == no_area:
         return "red"
-    elif free_area < small_area:
+    if free_area < small_area:
         return "orange"
-    elif free_area < big_area:
+    if free_area < big_area:
         return "yellow"
-    else:
-        return "green"
+    return "green"
 
 
 def get_rooms_color(rooms: float) -> str:
@@ -84,12 +82,11 @@ def get_rooms_color(rooms: float) -> str:
 
     if rooms < small_apartment:
         return "red"
-    elif rooms < average_apartment:
+    if rooms < average_apartment:
         return "orange"
-    elif rooms < big_apartment:
+    if rooms < big_apartment:
         return "yellow"
-    else:
-        return "green"
+    return "green"
 
 
 def get_price_color(price: float) -> str:
@@ -116,12 +113,11 @@ def get_price_color(price: float) -> str:
 
     if price < cheap_apartment:
         return "green"
-    elif price < average_apartment:
+    if price < average_apartment:
         return "yellow"
-    elif price < expensive_apartment:
+    if price < expensive_apartment:
         return "orange"
-    else:
-        return "red"
+    return "red"
 
 
 def create_map() -> None:
