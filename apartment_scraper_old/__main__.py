@@ -2,8 +2,8 @@ import asyncio
 
 import folium
 
-from apartment_scraper import willhaben
-from apartment_scraper.models import Model
+from apartment_scraper_old import willhaben
+from apartment_scraper_old.models import Model
 
 
 def main() -> None:

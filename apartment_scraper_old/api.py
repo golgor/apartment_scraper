@@ -5,9 +5,8 @@ from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import PlainTextResponse
 from loguru import logger
 
-from apartment_scraper import schemas
-from apartment_scraper.models import Apartment, Model
-
+from apartment_scraper_old import schemas
+from apartment_scraper_old.models import Apartment, Model
 
 if TYPE_CHECKING:
     from starlette.requests import Request
@@ -60,7 +59,7 @@ def read_root() -> dict[str, str]:
     "/apartments/",
     response_model=dict[str, int | list[schemas.ApartmentSchema]],
 )
-def query_all_apartments( # noqa: PLR0913
+def query_all_apartments(  # noqa: PLR0913
     pagesize: int = 100,
     page: int = 0,
     min_area: int = 0,

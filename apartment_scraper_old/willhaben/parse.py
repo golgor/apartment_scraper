@@ -5,7 +5,7 @@ from typing import Any
 from loguru import logger
 
 # from apartment_scraper import Apartment
-from apartment_scraper.models import Apartment
+from apartment_scraper_old.models import Apartment
 
 
 class ProductId(Enum):
