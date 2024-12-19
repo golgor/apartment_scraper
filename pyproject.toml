@@ -1,159 +1,23 @@
-[tool.poetry]
+[project]
 name = "apartment-scraper"
 version = "0.1.0"
-description = "\"Tool for evaluating apartments using APIs from Austrian Immobilien search engines.\""
-authors = ["Robert Nyström <robert.nystrom@toolsense.io>"]
-license = "MIT"
+description = "Add your description here"
 readme = "README.md"
-packages = [{ include = "apartment_scraper" }]
+authors = [
+    { name = "Robert Nyström", email = "golgafrincham@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic>=2.10.4",
+    "result>=0.17.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-fastapi = "^0.103.0"
-uvicorn = "^0.23"
-sqlmodel = "^0.0.8"
-httpx = {extras = ["http2"], version = "^0.25.0"}
-loguru = "^0.7.2"
-psycopg2 = "^2.9.7"
-python-dotenv = "^1.0.0"
-
-[tool.poetry.group.ci.dependencies]
-ruff = "^0.0.290"
-mypy = "^1.4.1"
-black = "^23.7.0"
+[project.scripts]
+apartment-scraper = "apartment_scraper:main"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.ruff]
-
-# Checks to add: ANN (Type annotation), B (Bug-bear), INP (Missing __init__)
-select = [
-    "ANN", # flake8-annotations
-    "E",   # pycodestyle
-    "F",   # PyFlakes
-    "W",   # pycodestyle
-    "I",   # isort
-    "D",   # pydocstyle
-    "PL",  # Pylint
-    "C90", # mccabe
-    "UP",  # pyupgrade
-    "S",   # flake8-bandit
-    "Q",   # flake8-quotes
-    "RET", # flake8-return
-    "PTH", # flake8-use-pathlib
-    "C4",  # flake8-comprehensions
-    "ISC", # flake8-implicit-str-concat
-    "G",   # flake8-logging-format
-    "TCH", # flake8-type-checking
-    "RUF", # Ruff-specific rules
-    "DJ",  # flake8-django
-    "A",   # flake8-builtins
-    "TRY", # tryceratops
-    "DTZ", # flake8-datetimez
-    "N",   # pep8-naming
-    "PT",  # flake8-pytest-style
-    "SIM", # flake8-simplify
-    "T20", # flake8-print
-    "INP", # flake8-no-pep420
-]
-
-ignore = ["D104", "D100", "D203", "D213", "S101", "RET505"]
-
-# Extend with RUF100, to check for unused noqa.
-extend-select = ["RUF100"]
-
-# Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = [
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "I",
-    "N",
-    "Q",
-    "S",
-    "T",
-    "W",
-    "ANN",
-    "ARG",
-    "BLE",
-    "COM",
-    "DJ",
-    "DTZ",
-    "EM",
-    "ERA",
-    "EXE",
-    "FBT",
-    "ICN",
-    "INP",
-    "ISC",
-    "NPY",
-    "PD",
-    "PGH",
-    "PIE",
-    "PL",
-    "PT",
-    "PTH",
-    "PYI",
-    "RET",
-    "RSE",
-    "RUF",
-    "SIM",
-    "SLF",
-    "TCH",
-    "TID",
-    "TRY",
-    "UP",
-    "YTT",
-]
-unfixable = []
-
-# Exclude a variety of commonly ignored directories.
-exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".git-rewrite",
-    ".hg",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "venv",
-    "migrations",
-    "performance_tests",
-    "scripts",
-    # "test_*",
-]
-
-# Same as Black.
-line-length = 120
-
-# Allow unused variables when underscore-prefixed.
-dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
-# Assume Python 3.10.
-target-version = "py311"
-
-[tool.ruff.pydocstyle]
-# Use Google-style docstrings.
-convention = "google"
-
-[tool.ruff.isort]
-lines-after-imports = 2
+[[tool.uv.index]]
+url = "https://_json_key_base64:ewogICJjbGllbnRfZW1haWwiOiAidG9vbHNlbnNlLXB5LXV0aWxzLXJ3QHRvb2xzZW5zZS5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsCiAgImNsaWVudF9pZCI6ICIxMDIzNzY4NTQ1MTI0MzU1ODMwMDkiLAogICJwcml2YXRlX2tleSI6ICItLS0tLUJFR0lOIFBSSVZBVEUgS0VZLS0tLS1cbk1JSUV2QUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktZd2dnU2lBZ0VBQW9JQkFRQ1ZvWDRvM0t2YVNpQ0dcblNDNlFFaUFLaksweWF2SXFKdE9YY0E2S0tKbldXdnJiZmN2WXZybEVMSlZ5M0t3KzNiOU1XOFZWSDJMcVV6c0pcbnNSWmdHeFpVTVJnNHBHUk9Tblg4d0t1VEM3ZTZjcWNWRTFvbVlyOUg5dkFJeFJkQlN2ZTdrMWVjRC9sRE5sQk1cbmhlQ3VMNFJRbTVUMDlPM1BCSU41d1kxOGF0STlUeEpXK2hjVElSeU8zV0kzVzBsNW1renNWb1pBVGdidGh3YXlcbjFtSTFGcUlnQ3JzTE0zQmpKeHFVaUJLem5KVFdGZTkvVWVpV1VDT2YzOGc2eW13T0Y1b0daMWRyZWQrMVhXZjVcbmV6TG9LV2RBUGYyWnVWTmVMVXJpdWNtNkFhcytocEZnNENMSlltM1RFeURRSU5uaG8zNEVGR25lSlJpUVNYV2Rcbm9NNkZML2JEQWdNQkFBRUNnZ0VBSll6QjZzSTZGRTArN1VQbS8zdTA4OERLNUJpbmpnRnhYeE1kYXZsMlphOHVcblBlL0xQS2pjT0dvUjFTSGd6ZVA3RWxBRGJQR3o4b2NSalVTV0QyY3N5dE1KTjRtMXJGb09VdkFNL3BsVnNhSDlcbklSSmFzTUJlTFZLZ2VTcnd3NDlyTFBUMGF2TXRRL3M0Mm9OTVY1b1FFK1IvVkp1MHBCdUhYUUpBSGVWMnZqQ2JcbjJWTlJmNDN6d0FoRW9sZ0gzeEhRUFlLS05LRVZLcEFWYmZ0SVJNc2RQaDhCTDRYYy9iNjR4cDR3WDVaelZIU3hcblRYSUpDTTBLLzBRSzc4OFFYTzVacU5JTVp6ZmtNc3NVa0dPc1BrQnFmTEtGSXRqdnQzd0Fmb1NoZ3ZmMWdHK0JcbnNINGNpT2xDTTJuNkFiY0xQK2lvalVIdjByTWcyTFpua01DOEhwMkFaUUtCZ1FETmtkUlhUQWo3TmJuZzdBb2JcblJ6Qk5KZnFJdlpYR1NsMVp6dmE2N2NpY2svL2Y2QmJqWlhZU1l6RGR6alpSb0JVL0ZYNXZnNTZITzJDcFpVZGFcbkF0UEE1dkdJMFdiV1F6Wkd6R2poYzZXamp5UzJscFM4dlh4K243RFRJeE9GSlRmUG4wTFNGMlZ6NmlURE9SVUdcbmRXWEI4S0RFZGJPWkFWVGV3a2hKbzM3NDd3S0JnUUM2VnBrSjVUam9IeFlmc2k0Um4rcFRONVJOcDhicEpBYlVcbjhuNkhJR1o3ZytYU0U5bENwZHYwTVlNdC9Rbmh3WXhUQkhzWGRxdXJBUDRoL1FaN0JzTmtOUFA4ZkRNSWlFNWhcbmFuVnNKTUVFNnZMQlRFRG11TXBqVzJhcTltTU1EeWlpZkNmeE5TVzNyT3hCOTBHcSsrdktRZkJMVzlZQk9QZU9cbjJJb1BBMldYYlFLQmdHTTE1eUgrZXpNcCtieDRqbVFkMWt6VmNIVS84aUhSei8zQTZjakxhNDlOeWlhNHJ4c3RcbjQyNzZXaUlpSElzR1ZGcXV0K2Qvd1NtSTJaekhXVWt5cGhtcUc1V3BZaFUwT09Td1VFbkdjNEZkV3gyWHpNN09cbk1HQTRGN0crY3ZSR1F3bzcxWmJwWGJnMG4ydHNpQjRtMkdaaUNHVG9YVFlSczNFU21LcVpjblVYQW9HQU9RZXNcbkN5Vkd4M1JNTnlNM2lsbGhSRnJzWHVBTXR1bzUxUTdxdnJ5aDRRZTdYUktLR2lYZExkM0JnbC9CbUlDK1MrSkJcbk1pczEyejZRaVNLQnkwR0VwN1MxUC85Yk55OVFuZXdSU0NudmtXdS9KSDRNRnhGVGtCazNVUGZiMUtNSEVzUGhcbkRhZndoVWk5Zm1zSWhDWmFRaXJ3T29BKy9Wek1GOElhYndIaEkva0NnWUJjTXFybkV5dGRtZ3NnaExCRjBnN3dcbnZhb1pVcTBER0VoanZPNmdzMURWRUljU0pDS3ZCOFNWMU96aHNHOHUybEJ6a3pnL3Q5Qy9JdklmV0U1amxZekZcbkFHYVZvTUJlQ2V3OHA5NXJtSzZWRzd5M2FpVDZPWkd4dVJjYnBRa1VrVHBYWkhPTU9sR3RhOGZpWWN4ZnZWK2NcbnJFU3Y3bk1VMUlsUW93SVh4Q2JzdVE9PVxuLS0tLS1FTkQgUFJJVkFURSBLRVktLS0tLVxuIiwKICAicHJpdmF0ZV9rZXlfaWQiOiAiMDkwNTBiYzRmYjMyNGExNWQ4M2QyZDQ0ZDMyYWMwN2QwNjcyOTRiYSIsCiAgInRva2VuX3VyaSI6ICJodHRwczovL29hdXRoMi5nb29nbGVhcGlzLmNvbS90b2tlbiIsCiAgInR5cGUiOiAic2VydmljZV9hY2NvdW50IiwKICAidW5pdmVyc2VfZG9tYWluIjogImdvb2dsZWFwaXMuY29tIgp9@europe-west1-python.pkg.dev/toolsense/toolsense-py-utils/simple/"
